@@ -1,0 +1,68 @@
+---
+import { SITO, linkWhatsApp } from '../config';
+import { link } from '../temi';
+interface Props {
+  tema: string;
+  titolo?: string;
+}
+const { tema, titolo = 'Ti aspettiamo alla Roscignola' } = Astro.props;
+---
+
+<section class="contatti-finale">
+  <div class="contenitore contatti-griglia">
+    <div>
+      <span class="occhiello">Prenota diretto</span>
+      <h2>{titolo}</h2>
+      <p>Prenotando dal sito paghi online in modo sicuro e hai il miglior prezzo, senza commissioni dei portali.</p>
+    </div>
+    <div class="contatti-azioni">
+      <a class="btn btn--chiaro" href={link(tema, 'disponibilita')}>Vedi le date libere</a>
+      <a class="btn btn--vuoto-chiaro" href={linkWhatsApp('Ciao! Vorrei informazioni su una camera alla Roscignola.')}>Scrivici su WhatsApp</a>
+      <p class="contatti-mini">{SITO.indirizzo} · Check‑in {SITO.checkin}</p>
+    </div>
+  </div>
+</section>
+
+<style>
+  .contatti-finale {
+    background: var(--bordeaux);
+    color: var(--avorio);
+    padding-block: clamp(56px, 8vw, 100px);
+  }
+  .contatti-finale .occhiello {
+    color: var(--oro);
+  }
+  .contatti-griglia {
+    display: grid;
+    gap: 28px;
+    align-items: end;
+  }
+  @media (min-width: 860px) {
+    .contatti-griglia {
+      grid-template-columns: 1.3fr 1fr;
+    }
+  }
+  .contatti-finale p {
+    color: rgba(246, 240, 231, 0.85);
+    max-width: 52ch;
+  }
+  .contatti-azioni {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .btn--vuoto-chiaro {
+    background: transparent;
+    border-color: rgba(246, 240, 231, 0.6);
+    color: var(--avorio);
+  }
+  .btn--vuoto-chiaro:hover {
+    background: rgba(246, 240, 231, 0.12);
+  }
+  .contatti-mini {
+    width: 100%;
+    font-size: 0.85rem;
+    margin: 6px 0 0;
+    opacity: 0.75;
+  }
+</style>

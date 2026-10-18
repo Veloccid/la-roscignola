@@ -1,0 +1,201 @@
+---
+import Logo from '../../components/Logo.astro';
+import Foto from '../../components/Foto.astro';
+import Calendario from '../../components/Calendario.astro';
+import BloccoContatti from '../../components/BloccoContatti.astro';
+import { CAMERE } from '../../data/camere';
+import { link } from '../../temi';
+const { tema } = Astro.props;
+---
+
+<section class="ap">
+  <div class="contenitore ap-in">
+    <Logo class="ap-logo" />
+    <p class="ap-frase">Bed & Breakfast · quattro camere · colazione fatta in casa</p>
+    <div class="ap-azioni">
+      <a class="btn btn--chiaro" href={link(tema, 'disponibilita')}>Prenota le tue date</a>
+      <a class="ap-link" href="#camere">Scopri le camere ↓</a>
+    </div>
+  </div>
+  <div class="ap-foto contenitore">
+    <Foto soggetto="Esterno della casa" tipo="esterno" tinta={['#5A1520', '#B48F5A']} rapporto="21 / 9" />
+  </div>
+</section>
+
+<section class="numeri">
+  <div class="contenitore numeri-in">
+    <div><b>4</b><span>camere con bagno privato</span></div>
+    <div><b>7:30</b><span>colazione fino alle 10</span></div>
+    <div><b>0 €</b><span>di commissioni prenotando qui</span></div>
+  </div>
+</section>
+
+<section class="camere" id="camere">
+  {
+    CAMERE.map((c, i) => (
+      <article class:list={['cam', `cam--${i % 2 ? 'sabbia' : 'avorio'}`]}>
+        <div class="contenitore cam-in">
+          <div class="cam-num">0{i + 1}</div>
+          <div class="cam-testo rivela">
+            <h2>{c.nome}</h2>
+            <p>{c.descrizione}</p>
+            <p class="cam-meta">{c.letti} · {c.mq} m² · fino a {c.ospiti} ospiti</p>
+            <div class="cam-piede">
+              <span class="cam-prezzo">da {c.prezzo}€</span>
+              <a class="btn" href={`${link(tema, 'disponibilita')}?camera=${c.id}`}>Date libere</a>
+            </div>
+          </div>
+          <Foto soggetto={c.nome} tipo="camera" tinta={c.tinta} rapporto="4 / 5" class="cam-foto rivela" />
+        </div>
+      </article>
+    ))
+  }
+</section>
+
+<section class="cal">
+  <div class="contenitore">
+    <span class="occhiello">Disponibilità</span>
+    <h2>Scegli i giorni, il resto lo pensiamo noi</h2>
+    <Calendario tema={tema} />
+  </div>
+</section>
+
+<BloccoContatti tema={tema} />
+
+<style>
+  .ap {
+    background: var(--bordeaux);
+    color: var(--avorio);
+    padding-top: 120px;
+  }
+  .ap-in {
+    text-align: center;
+    display: grid;
+    justify-items: center;
+    gap: 18px;
+    padding-bottom: 48px;
+  }
+  .ap :global(.ap-logo) {
+    width: min(760px, 92%);
+    --logo-occhio: var(--bordeaux);
+    animation: entra 1.2s ease both;
+  }
+  .ap-frase {
+    font-size: 0.85rem;
+    letter-spacing: 0.24em;
+    text-transform: uppercase;
+    color: var(--sabbia);
+    margin: 18px 0 8px;
+  }
+  .ap-azioni {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: center;
+    justify-content: center;
+  }
+  .ap-link {
+    color: var(--avorio);
+    font-size: 0.95rem;
+  }
+  .ap-foto {
+    position: relative;
+    margin-bottom: -80px;
+  }
+  @keyframes entra {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+      filter: blur(6px);
+    }
+  }
+  .numeri {
+    background: var(--avorio);
+    padding: 120px 0 40px;
+  }
+  .numeri-in {
+    display: grid;
+    gap: 24px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    text-align: center;
+  }
+  .numeri b {
+    display: block;
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(2.6rem, 6vw, 4rem);
+    color: var(--bordeaux);
+    line-height: 1;
+  }
+  .numeri span {
+    font-size: 0.9rem;
+    color: var(--tenue);
+  }
+  .cam {
+    padding-block: clamp(56px, 8vw, 110px);
+  }
+  .cam--avorio {
+    background: var(--avorio);
+  }
+  .cam--sabbia {
+    background: var(--sabbia);
+  }
+  .cam-in {
+    display: grid;
+    gap: 24px;
+    align-items: center;
+  }
+  @media (min-width: 900px) {
+    .cam-in {
+      grid-template-columns: 120px 1.1fr 1fr;
+      gap: 48px;
+    }
+    .cam--sabbia .cam-in {
+      grid-template-columns: 120px 1fr 1.1fr;
+    }
+    .cam--sabbia :global(.cam-foto) {
+      order: -1;
+      grid-column: 2;
+      grid-row: 1;
+    }
+    .cam--sabbia .cam-testo {
+      grid-column: 3;
+    }
+    .cam--sabbia .cam-num {
+      grid-column: 1;
+      grid-row: 1;
+    }
+  }
+  .cam-num {
+    font-family: var(--serif);
+    font-size: clamp(3rem, 8vw, 6rem);
+    color: var(--bordeaux);
+    line-height: 1;
+    align-self: start;
+  }
+  .cam-testo h2 {
+    color: var(--bordeaux);
+  }
+  .cam-meta {
+    font-size: 0.85rem;
+    color: var(--tenue);
+  }
+  .cam-piede {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .cam-prezzo {
+    font-family: var(--serif);
+    font-size: 1.8rem;
+  }
+  .cal {
+    background: var(--bordeaux-scuro);
+    color: var(--avorio);
+    padding-block: clamp(56px, 8vw, 110px);
+  }
+  .cal .occhiello {
+    color: var(--oro);
+  }
+</style>

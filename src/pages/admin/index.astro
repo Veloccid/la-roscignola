@@ -1,0 +1,1315 @@
+---
+import '../../styles/global.css';
+import Logo from '../../components/Logo.astro';
+import { CAMERE } from '../../data/camere';
+---
+
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Area proprietario · La Roscignola</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body class="adm">
+    <!-- ACCESSO -->
+    <section class="accesso" id="accesso">
+      <form class="accesso-box" id="accesso-form">
+        <Logo class="accesso-logo" />
+        <h1>Area proprietario</h1>
+        <p class="tenue">Gestisci camere, prenotazioni e calendari di Airbnb e Booking.</p>
+        <label>Password<input type="password" id="pwd" autocomplete="current-password" placeholder="Password" /></label>
+        <p class="errore" id="pwd-err" role="alert"></p>
+        <button class="btn" type="submit">Entra</button>
+        <p class="demo-nota"><span class="provvisorio">Demo</span> password: <b>roscignola</b>. Nel sito vero ogni accesso è protetto da un account vero.</p>
+        <a class="accesso-link" href="/">← Torna alle proposte</a>
+      </form>
+    </section>
+
+    <!-- APP -->
+    <div class="app" id="app" hidden>
+      <header class="app-testa">
+        <div class="app-testa-sx">
+          <Logo variante="marchio" class="app-logo" />
+          <div>
+            <b>La Roscignola</b>
+            <span id="sync-stato" class="sync-stato">Sincronizzato</span>
+          </div>
+        </div>
+        <div class="app-testa-dx">
+          <button class="btn app-nuova" type="button" data-azione="nuova">+ <span class="solo-largo">Prenotazione</span><span class="solo-stretto">Nuova</span></button>
+          <button class="app-esci" type="button" id="esci" aria-label="Esci">Esci</button>
+        </div>
+      </header>
+
+      <nav class="schede" role="tablist" aria-label="Sezioni">
+        <button role="tab" data-scheda="panoramica" aria-selected="true">Panoramica</button>
+        <button role="tab" data-scheda="calendario" aria-selected="false">Calendario</button>
+        <button role="tab" data-scheda="elenco" aria-selected="false">Prenotazioni</button>
+        <button role="tab" data-scheda="sync" aria-selected="false">Airbnb e Booking</button>
+        <button role="tab" data-scheda="prezzi" aria-selected="false">Prezzi</button>
+      </nav>
+
+      <main class="app-corpo">
+        <section data-pannello="panoramica">
+          <div class="stat" id="stat"></div>
+          <div class="due">
+            <div class="riquadro">
+              <h2>Prossimi arrivi</h2>
+              <ul class="lista" id="arrivi"></ul>
+            </div>
+            <div class="riquadro">
+              <h2>Oggi in casa</h2>
+              <ul class="lista" id="oggi-casa"></ul>
+            </div>
+          </div>
+        </section>
+
+        <section data-pannello="calendario" hidden>
+          <div class="pl-barra">
+            <div class="pl-nav">
+              <button type="button" data-pl="-7" aria-label="Settimana precedente">‹</button>
+              <button type="button" data-pl="0">Oggi</button>
+              <button type="button" data-pl="7" aria-label="Settimana successiva">›</button>
+              <b id="pl-titolo"></b>
+            </div>
+            <div class="legenda" id="legenda"></div>
+          </div>
+          <p class="tenue suggerimento">Tocca un giorno vuoto per inserire una prenotazione o chiudere la camera. Tocca una prenotazione per i dettagli.</p>
+          <div class="pl-scorri"><div class="pl" id="planning"></div></div>
+        </section>
+
+        <section data-pannello="elenco" hidden>
+          <div class="filtri">
+            <input type="search" id="cerca" placeholder="Cerca ospite…" aria-label="Cerca ospite" />
+            <select id="f-quando" aria-label="Periodo">
+              <option value="future">In arrivo</option>
+              <option value="passate">Passate</option>
+              <option value="tutte">Tutte</option>
+            </select>
+            <select id="f-fonte" aria-label="Provenienza">
+              <option value="">Tutte le provenienze</option>
+              <option value="sito">Sito</option>
+              <option value="airbnb">Airbnb</option>
+              <option value="booking">Booking</option>
+              <option value="manuale">Manuale</option>
+              <option value="blocco">Chiusure</option>
+            </select>
+          </div>
+          <div class="tabella" id="tabella"></div>
+        </section>
+
+        <section data-pannello="sync" hidden>
+          <div class="riquadro spiega">
+            <h2>Come funziona</h2>
+            <ol>
+              <li><b>Da Airbnb e Booking verso il sito:</b> incolla qui il link del calendario (iCal) che trovi su Airbnb in <i>Calendario → Disponibilità → Collega calendari</i> e su Booking in <i>Tariffe e disponibilità → Sincronizza calendari</i>.</li>
+              <li><b>Dal sito verso Airbnb e Booking:</b> copia il link “da dare ai portali” di ogni camera e incollalo negli stessi menu. Così una prenotazione fatta sul sito chiude le date anche lì.</li>
+              <li>Il sito controlla i calendari in automatico ogni 15 minuti; puoi forzarlo con “Sincronizza ora”.</li>
+            </ol>
+          </div>
+          <div id="sync-camere" class="sync-camere"></div>
+        </section>
+
+        <section data-pannello="prezzi" hidden>
+          <div class="riquadro">
+            <h2>Prezzo a notte</h2>
+            <p class="tenue">È il prezzo che vedono gli ospiti sul sito. Su Airbnb e Booking i prezzi si gestiscono dai loro pannelli.</p>
+            <form id="prezzi" class="prezzi"></form>
+          </div>
+          <div class="riquadro pericolo">
+            <h2>Dati di prova</h2>
+            <p class="tenue">Rimette le prenotazioni di esempio e cancella quelle aggiunte durante la prova.</p>
+            <button class="btn btn--vuoto" type="button" id="ripristina">Ripristina dati demo</button>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- FINESTRA NUOVA -->
+    <dialog id="d-nuova" class="finestra">
+      <form method="dialog" id="f-nuova">
+        <h2>Nuova prenotazione</h2>
+        <div class="campi">
+          <label>Camera<select name="camera">{CAMERE.map((c) => <option value={c.id}>{c.nome}</option>)}</select></label>
+          <label>Tipo<select name="fonte">
+            <option value="manuale">Prenotazione (telefono, di persona…)</option>
+            <option value="blocco">Chiudi la camera (non disponibile)</option>
+          </select></label>
+          <label>Arrivo<input type="date" name="dal" required /></label>
+          <label>Partenza<input type="date" name="al" required /></label>
+          <label class="largo solo-pren">Nome ospite<input name="ospite" /></label>
+          <label class="solo-pren">Ospiti<input type="number" name="ospiti" min="1" max="4" value="2" /></label>
+          <label class="solo-pren">Totale €<input type="number" name="totale" min="0" step="1" /></label>
+          <label class="largo">Note<input name="note" placeholder="Es. arrivo tardi, lavori, ferie…" /></label>
+        </div>
+        <p class="errore" id="nuova-err" role="alert"></p>
+        <div class="finestra-azioni">
+          <button class="btn btn--vuoto" value="annulla" formnovalidate>Annulla</button>
+          <button class="btn" value="salva" id="salva-nuova">Salva</button>
+        </div>
+      </form>
+    </dialog>
+
+    <!-- FINESTRA DETTAGLIO -->
+    <dialog id="d-dettaglio" class="finestra">
+      <div id="dettaglio"></div>
+    </dialog>
+
+    <div class="avviso" id="avviso" role="status" aria-live="polite"></div>
+  </body>
+</html>
+
+<script>
+  import { CAMERE } from '../../data/camere';
+  import {
+    carica,
+    salva,
+    ripristina,
+    aggiungi,
+    rimuovi,
+    impostaPrezzo,
+    sincronizzaDemo,
+    ics,
+    oggi,
+    piuGiorni,
+    notti,
+    daIso,
+    dataLunga,
+    euro,
+    occupata,
+    prezzo,
+    FONTI,
+    type Prenotazione,
+    type Fonte,
+  } from '../../lib/prenotazioni';
+
+  const $ = <T extends HTMLElement = HTMLElement>(s: string) => document.querySelector(s) as T;
+  const CHIAVE_ACCESSO = 'roscignola-admin';
+  let inizio = piuGiorni(oggi(), -2);
+  const GIORNI_PL = 21;
+
+  // ---------- accesso ----------
+  function entra() {
+    $('#accesso').hidden = true;
+    $('#app').hidden = false;
+    tutto();
+  }
+  try {
+    if (sessionStorage.getItem(CHIAVE_ACCESSO) === '1') entra();
+  } catch {}
+  $('#accesso-form').addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (($('#pwd') as HTMLInputElement).value.trim().toLowerCase() === 'roscignola') {
+      try {
+        sessionStorage.setItem(CHIAVE_ACCESSO, '1');
+      } catch {}
+      entra();
+    } else $('#pwd-err').textContent = 'Password sbagliata.';
+  });
+  $('#esci').addEventListener('click', () => {
+    try {
+      sessionStorage.removeItem(CHIAVE_ACCESSO);
+    } catch {}
+    location.reload();
+  });
+
+  // ---------- schede ----------
+  document.querySelectorAll<HTMLButtonElement>('[data-scheda]').forEach((b) =>
+    b.addEventListener('click', () => {
+      document.querySelectorAll('[data-scheda]').forEach((x) => x.setAttribute('aria-selected', String(x === b)));
+      document.querySelectorAll<HTMLElement>('[data-pannello]').forEach((p) => (p.hidden = p.dataset.pannello !== b.dataset.scheda));
+      window.scrollTo({ top: 0 });
+    }),
+  );
+
+  function avviso(t: string) {
+    const a = $('#avviso');
+    a.textContent = t;
+    a.classList.add('su');
+    clearTimeout((a as any)._t);
+    (a as any)._t = setTimeout(() => a.classList.remove('su'), 2600);
+  }
+
+  const nomeCam = (id: string) => CAMERE.find((c) => c.id === id)?.nome ?? id;
+  const badge = (f: Fonte) => `<span class="badge" style="--c:${FONTI[f].colore}">${FONTI[f].nome}</span>`;
+  const esc = (s = '') => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
+
+  // ---------- panoramica ----------
+  function panoramica() {
+    const s = carica();
+    const t = oggi();
+    const pren = s.prenotazioni.filter((p) => p.fonte !== 'blocco');
+    const arriviOggi = pren.filter((p) => p.dal === t).length;
+    const partenzeOggi = pren.filter((p) => p.al === t).length;
+    let notteOcc = 0;
+    for (let i = 0; i < 30; i++) {
+      const g = piuGiorni(t, i);
+      notteOcc += CAMERE.filter((c) => pren.some((p) => p.camera === c.id && p.dal <= g && g < p.al)).length;
+    }
+    const occ = Math.round((notteOcc / (30 * CAMERE.length)) * 100);
+    const mese = t.slice(0, 7);
+    const incasso = pren.filter((p) => p.dal.slice(0, 7) === mese).reduce((a, p) => a + (p.totale || 0), 0);
+    const dalSito = pren.filter((p) => p.fonte === 'sito' && p.dal.slice(0, 7) === mese).length;
+    $('#stat').innerHTML = `
+      <div><span>Arrivi oggi</span><b>${arriviOggi}</b></div>
+      <div><span>Partenze oggi</span><b>${partenzeOggi}</b></div>
+      <div><span>Occupazione 30 giorni</span><b>${occ}%</b><i style="--p:${occ}%"></i></div>
+      <div><span>Incasso del mese</span><b>${euro(incasso)}</b><small>${dalSito} prenotazioni dal sito, senza commissioni</small></div>`;
+
+    const prossimi = pren.filter((p) => p.dal >= t && p.dal <= piuGiorni(t, 10)).sort((a, b) => a.dal.localeCompare(b.dal));
+    $('#arrivi').innerHTML = prossimi.length
+      ? prossimi.map((p) => rigaLista(p, p.dal === t ? 'Oggi' : dataLunga(p.dal))).join('')
+      : '<li class="vuoto">Nessun arrivo nei prossimi 10 giorni.</li>';
+    const inCasa = pren.filter((p) => p.dal <= t && t < p.al);
+    $('#oggi-casa').innerHTML = CAMERE.map((c) => {
+      const p = inCasa.find((x) => x.camera === c.id);
+      return p
+        ? rigaLista(p, c.nome.replace('Camera ', ''))
+        : `<li class="libera"><span class="lista-data">${c.nome.replace('Camera ', '')}</span><span class="tenue">Libera stanotte</span></li>`;
+    }).join('');
+  }
+  function rigaLista(p: Prenotazione, etichetta: string) {
+    return `<li><button type="button" data-id="${p.id}"><span class="lista-data">${etichetta}</span>
+      <span class="lista-nome"><b>${esc(p.ospite)}</b><small>${nomeCam(p.camera)} · ${notti(p.dal, p.al)} notti</small></span>${badge(p.fonte)}</button></li>`;
+  }
+
+  // ---------- planning ----------
+  function planning() {
+    const s = carica();
+    const fine = piuGiorni(inizio, GIORNI_PL);
+    $('#pl-titolo').textContent = `${dataLunga(inizio)} – ${dataLunga(piuGiorni(fine, -1))}`;
+    $('#legenda').innerHTML = (Object.keys(FONTI) as Fonte[]).map((f) => badge(f)).join('');
+    const t = oggi();
+    let h = `<div class="pl-griglia" style="--n:${GIORNI_PL}"><div class="pl-angolo"></div>`;
+    for (let i = 0; i < GIORNI_PL; i++) {
+      const g = piuGiorni(inizio, i);
+      const d = daIso(g);
+      const we = d.getDay() === 0 || d.getDay() === 6;
+      h += `<div class="pl-giorno${g === t ? ' oggi' : ''}${we ? ' we' : ''}" style="grid-column:${i + 2}"><small>${d
+        .toLocaleDateString('it-IT', { weekday: 'short' })
+        .slice(0, 3)}</small>${d.getDate()}</div>`;
+    }
+    CAMERE.forEach((c, r) => {
+      const riga = r + 2;
+      h += `<div class="pl-camera" style="grid-row:${riga}"><b>${c.nome.replace('Camera ', '').replace('Suite ', '')}</b><small>${euro(prezzo(c.id))}</small></div>`;
+      for (let i = 0; i < GIORNI_PL; i++) {
+        const g = piuGiorni(inizio, i);
+        const passato = g < t;
+        h += `<button type="button" class="pl-cella${g === t ? ' oggi' : ''}${passato ? ' passato' : ''}" style="grid-row:${riga};grid-column:${i + 2}" data-cam="${c.id}" data-g="${g}" aria-label="${c.nome}, ${dataLunga(g)}" ${
+          occupata(c.id, g) || passato ? 'tabindex="-1"' : ''
+        }></button>`;
+      }
+      s.prenotazioni
+        .filter((p) => p.camera === c.id && p.al > inizio && p.dal < fine)
+        .forEach((p) => {
+          const da = Math.max(0, notti(inizio, p.dal));
+          const a = Math.min(GIORNI_PL, notti(inizio, p.al));
+          const taglioSx = p.dal < inizio;
+          const taglioDx = p.al > fine;
+          h += `<button type="button" class="pl-barra-pren${taglioSx ? ' tsx' : ''}${taglioDx ? ' tdx' : ''}" data-id="${p.id}" style="grid-row:${riga};grid-column:${da + 2} / ${a + 2};--c:${FONTI[p.fonte].colore}" title="${esc(p.ospite)}">
+            <span>${p.fonte === 'blocco' ? 'Chiusa' + (p.note ? ' · ' + esc(p.note) : '') : esc(p.ospite)}</span></button>`;
+        });
+    });
+    h += '</div>';
+    $('#planning').innerHTML = h;
+  }
+  document.querySelectorAll<HTMLButtonElement>('[data-pl]').forEach((b) =>
+    b.addEventListener('click', () => {
+      const n = Number(b.dataset.pl);
+      inizio = n === 0 ? piuGiorni(oggi(), -2) : piuGiorni(inizio, n);
+      planning();
+    }),
+  );
+  $('#planning').addEventListener('click', (e) => {
+    const el = e.target as HTMLElement;
+    const barra = el.closest<HTMLElement>('.pl-barra-pren');
+    if (barra) return dettaglio(barra.dataset.id!);
+    const cella = el.closest<HTMLElement>('.pl-cella');
+    if (cella && !cella.classList.contains('passato') && !occupata(cella.dataset.cam!, cella.dataset.g!))
+      apriNuova(cella.dataset.cam!, cella.dataset.g!);
+  });
+
+  // ---------- elenco ----------
+  function elenco() {
+    const s = carica();
+    const t = oggi();
+    const q = ($('#cerca') as HTMLInputElement).value.trim().toLowerCase();
+    const quando = ($('#f-quando') as HTMLSelectElement).value;
+    const fonte = ($('#f-fonte') as HTMLSelectElement).value;
+    let righe = s.prenotazioni.filter(
+      (p) =>
+        (quando === 'tutte' || (quando === 'future' ? p.al >= t : p.al < t)) &&
+        (!fonte || p.fonte === fonte) &&
+        (!q || p.ospite.toLowerCase().includes(q)),
+    );
+    righe.sort((a, b) => (quando === 'passate' ? b.dal.localeCompare(a.dal) : a.dal.localeCompare(b.dal)));
+    $('#tabella').innerHTML = righe.length
+      ? `<div class="t-testa"><span>Ospite</span><span>Camera</span><span>Date</span><span>Totale</span><span>Da</span></div>` +
+        righe
+          .map(
+            (p) => `<button type="button" class="t-riga" data-id="${p.id}">
+          <span class="t-ospite"><b>${esc(p.ospite)}</b>${p.ospiti ? `<small>${p.ospiti} ospiti</small>` : ''}</span>
+          <span>${nomeCam(p.camera)}</span>
+          <span>${dataLunga(p.dal)} → ${dataLunga(p.al)} <small>${notti(p.dal, p.al)} notti</small></span>
+          <span>${p.fonte === 'blocco' ? '—' : euro(p.totale || 0)}${p.pagato && p.fonte !== 'blocco' ? ' <small class="pagato">pagato</small>' : ''}</span>
+          <span>${badge(p.fonte)}</span></button>`,
+          )
+          .join('')
+      : '<p class="vuoto">Nessuna prenotazione con questi filtri.</p>';
+  }
+  ['#cerca', '#f-quando', '#f-fonte'].forEach((s) => $(s).addEventListener('input', elenco));
+
+  // ---------- sync ----------
+  function sync() {
+    const s = carica();
+    $('#sync-camere').innerHTML = CAMERE.map((c) => {
+      const x = s.sync[c.id];
+      const quando = x?.ultima ? new Date(x.ultima).toLocaleString('it-IT', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'mai';
+      return `<div class="riquadro sync-camera">
+        <div class="sync-testa"><h3>${c.nome}</h3><span class="tenue">Ultimo controllo: ${quando}</span></div>
+        <label>Link calendario Airbnb <span class="tenue">(da importare)</span><input data-sync="${c.id}" data-canale="airbnb" value="${esc(x?.airbnb)}" /></label>
+        <label>Link calendario Booking <span class="tenue">(da importare)</span><input data-sync="${c.id}" data-canale="booking" value="${esc(x?.booking)}" /></label>
+        <label>Link da dare ad Airbnb e Booking<div class="copia"><input readonly value="https://laroscignola.it/ical/${c.id}.ics" /><button type="button" class="btn btn--vuoto" data-copia="https://laroscignola.it/ical/${c.id}.ics">Copia</button></div></label>
+        <div class="sync-azioni">
+          <button type="button" class="btn" data-sincro="${c.id}">Sincronizza ora</button>
+          <button type="button" class="btn btn--vuoto" data-ics="${c.id}">Scarica file .ics</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  $('#sync-camere').addEventListener('change', (e) => {
+    const i = e.target as HTMLInputElement;
+    if (!i.dataset.sync) return;
+    const s = carica();
+    (s.sync[i.dataset.sync] as any)[i.dataset.canale!] = i.value;
+    salva(s);
+    avviso('Link salvato');
+  });
+  $('#sync-camere').addEventListener('click', async (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLButtonElement>('button');
+    if (!b) return;
+    if (b.dataset.sincro) {
+      b.disabled = true;
+      b.textContent = 'Controllo…';
+      $('#sync-stato').textContent = 'Sincronizzazione…';
+      setTimeout(() => {
+        sincronizzaDemo(b.dataset.sincro);
+        $('#sync-stato').textContent = 'Sincronizzato';
+        avviso('Calendari Airbnb e Booking aggiornati');
+        tutto();
+      }, 900);
+    } else if (b.dataset.ics) {
+      const blob = new Blob([ics(b.dataset.ics)], { type: 'text/calendar' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `roscignola-${b.dataset.ics}.ics`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    } else if (b.dataset.copia) {
+      try {
+        await navigator.clipboard.writeText(b.dataset.copia);
+        avviso('Link copiato');
+      } catch {
+        avviso('Copia non riuscita: seleziona il link a mano');
+      }
+    }
+  });
+
+  // ---------- prezzi ----------
+  function prezzi() {
+    $('#prezzi').innerHTML =
+      CAMERE.map(
+        (c) => `<label><span><b>${c.nome}</b><small>fino a ${c.ospiti} ospiti</small></span>
+        <span class="euro"><input type="number" min="0" step="1" name="${c.id}" value="${prezzo(c.id)}" />€</span></label>`,
+      ).join('') + '<button class="btn" type="submit">Salva prezzi</button>';
+  }
+  $('#prezzi').addEventListener('submit', (e) => {
+    e.preventDefault();
+    new FormData(e.target as HTMLFormElement).forEach((v, k) => impostaPrezzo(k, Math.max(0, Number(v) || 0)));
+    avviso('Prezzi aggiornati: li vedi subito sul sito');
+    tutto();
+  });
+  $('#ripristina').addEventListener('click', () => {
+    if (confirm('Ripristinare i dati di esempio? Le prenotazioni di prova aggiunte verranno tolte.')) {
+      ripristina();
+      avviso('Dati demo ripristinati');
+      tutto();
+    }
+  });
+
+  // ---------- nuova ----------
+  const dNuova = $('#d-nuova') as HTMLDialogElement;
+  const fNuova = $('#f-nuova') as HTMLFormElement;
+  function apriNuova(camera = CAMERE[0].id, dal = oggi()) {
+    fNuova.reset();
+    (fNuova.elements.namedItem('camera') as HTMLSelectElement).value = camera;
+    (fNuova.elements.namedItem('dal') as HTMLInputElement).value = dal;
+    (fNuova.elements.namedItem('al') as HTMLInputElement).value = piuGiorni(dal, 1);
+    $('#nuova-err').textContent = '';
+    aggiornaTipo();
+    dNuova.showModal();
+  }
+  function aggiornaTipo() {
+    const blocco = (fNuova.elements.namedItem('fonte') as HTMLSelectElement).value === 'blocco';
+    fNuova.querySelectorAll<HTMLElement>('.solo-pren').forEach((el) => (el.hidden = blocco));
+  }
+  fNuova.elements.namedItem('fonte')!.addEventListener('change', aggiornaTipo);
+  document.querySelectorAll('[data-azione="nuova"]').forEach((b) => b.addEventListener('click', () => apriNuova()));
+  fNuova.addEventListener('submit', (e) => {
+    const sub = (e as SubmitEvent).submitter as HTMLButtonElement | null;
+    if (sub?.value !== 'salva') return;
+    e.preventDefault();
+    const d = new FormData(fNuova);
+    const fonte = d.get('fonte') as Fonte;
+    const dal = String(d.get('dal'));
+    const al = String(d.get('al'));
+    const camera = String(d.get('camera'));
+    if (!dal || !al || al <= dal) return ($('#nuova-err').textContent = 'La partenza deve essere dopo l’arrivo.');
+    const ospite = fonte === 'blocco' ? 'Camera chiusa' : String(d.get('ospite')).trim();
+    if (!ospite) return ($('#nuova-err').textContent = 'Scrivi il nome dell’ospite.');
+    try {
+      aggiungi({
+        camera,
+        dal,
+        al,
+        ospite,
+        fonte,
+        ospiti: Number(d.get('ospiti')) || undefined,
+        totale: fonte === 'blocco' ? 0 : Number(d.get('totale')) || prezzo(camera) * notti(dal, al),
+        pagato: false,
+        note: String(d.get('note') || ''),
+      });
+      dNuova.close();
+      avviso(fonte === 'blocco' ? 'Camera chiusa: date non più prenotabili' : 'Prenotazione salvata');
+      tutto();
+    } catch (err) {
+      $('#nuova-err').textContent = (err as Error).message;
+    }
+  });
+
+  // ---------- dettaglio ----------
+  const dDett = $('#d-dettaglio') as HTMLDialogElement;
+  function dettaglio(id: string) {
+    const p = carica().prenotazioni.find((x) => x.id === id);
+    if (!p) return;
+    const esterno = p.fonte === 'airbnb' || p.fonte === 'booking';
+    $('#dettaglio').innerHTML = `
+      <div class="dett-testa">${badge(p.fonte)}<button type="button" class="chiudi" aria-label="Chiudi">×</button></div>
+      <h2>${esc(p.ospite)}</h2>
+      <dl class="dett">
+        <div><dt>Camera</dt><dd>${nomeCam(p.camera)}</dd></div>
+        <div><dt>Notti</dt><dd>${notti(p.dal, p.al)}</dd></div>
+        <div><dt>Arrivo</dt><dd>${dataLunga(p.dal)}</dd></div>
+        <div><dt>Partenza</dt><dd>${dataLunga(p.al)}</dd></div>
+        ${p.fonte !== 'blocco' ? `<div><dt>Ospiti</dt><dd>${p.ospiti ?? '—'}</dd></div><div><dt>Totale</dt><dd>${euro(p.totale || 0)}${p.pagato ? ' · pagato' : ''}</dd></div>` : ''}
+        ${p.email ? `<div class="largo"><dt>Email</dt><dd><a href="mailto:${esc(p.email)}">${esc(p.email)}</a></dd></div>` : ''}
+        ${p.telefono ? `<div class="largo"><dt>Telefono</dt><dd><a href="tel:${esc(p.telefono)}">${esc(p.telefono)}</a></dd></div>` : ''}
+        ${p.note ? `<div class="largo"><dt>Note</dt><dd>${esc(p.note)}</dd></div>` : ''}
+      </dl>
+      ${
+        esterno
+          ? `<p class="tenue dett-nota">Arriva da ${FONTI[p.fonte].nome}: per modificarla o cancellarla usa il pannello di ${FONTI[p.fonte].nome}, il sito si aggiorna da solo.</p>`
+          : `<div class="finestra-azioni"><button type="button" class="btn btn--vuoto elimina" data-id="${p.id}">${
+              p.fonte === 'blocco' ? 'Riapri le date' : 'Cancella prenotazione'
+            }</button></div>`
+      }`;
+    dDett.showModal();
+  }
+  dDett.addEventListener('click', (e) => {
+    const el = e.target as HTMLElement;
+    if (el === dDett || el.closest('.chiudi')) return dDett.close();
+    const del = el.closest<HTMLElement>('.elimina');
+    if (del && confirm('Confermi? Le date torneranno libere sul sito e su Airbnb/Booking.')) {
+      rimuovi(del.dataset.id!);
+      dDett.close();
+      avviso('Fatto: date di nuovo libere');
+      tutto();
+    }
+  });
+  document.addEventListener('click', (e) => {
+    const b = (e.target as HTMLElement).closest<HTMLElement>('.lista button[data-id], .t-riga');
+    if (b) dettaglio(b.dataset.id!);
+  });
+
+  function tutto() {
+    panoramica();
+    planning();
+    elenco();
+    sync();
+    prezzi();
+  }
+</script>
+
+<style is:global>
+  .adm {
+    background: #f3ede4;
+  }
+  .accesso {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 24px 16px;
+    background:
+      radial-gradient(80% 60% at 80% 0%, rgba(180, 143, 90, 0.25), transparent 60%),
+      linear-gradient(160deg, var(--bordeaux), var(--bordeaux-scuro));
+  }
+  .accesso[hidden] {
+    display: none;
+  }
+  .accesso-box {
+    width: 100%;
+    max-width: 400px;
+    background: var(--avorio);
+    border-radius: 22px;
+    padding: 36px 28px;
+    box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.45);
+    display: grid;
+    gap: 12px;
+  }
+  .accesso-box .accesso-logo {
+    width: 180px;
+    color: var(--bordeaux);
+    margin-bottom: 12px;
+  }
+  .accesso-box h1 {
+    font-size: 2rem;
+    margin: 0;
+  }
+  .accesso-box label {
+    display: grid;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: var(--tenue);
+  }
+  .adm input,
+  .adm select {
+    font: inherit;
+    font-size: 1rem;
+    color: var(--testo);
+    padding: 11px 13px;
+    border-radius: 10px;
+    border: 1px solid var(--linea);
+    background: var(--bianco);
+    min-height: 46px;
+    width: 100%;
+    min-width: 0;
+  }
+  .demo-nota {
+    font-size: 0.8rem;
+    color: var(--tenue);
+    margin: 0;
+  }
+  .accesso-link {
+    font-size: 0.85rem;
+    color: var(--tenue);
+  }
+  .errore {
+    color: #a3242f;
+    font-size: 0.88rem;
+    min-height: 1.2em;
+    margin: 0;
+  }
+
+  .app[hidden] {
+    display: none;
+  }
+  .app-testa {
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    background: var(--bordeaux);
+    color: var(--avorio);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px var(--gutter);
+  }
+  .app-testa-sx {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+  }
+  .app-testa-sx b {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 1.2rem;
+    display: block;
+    line-height: 1.1;
+  }
+  .app-logo {
+    width: 44px;
+    color: var(--avorio);
+    --logo-occhio: var(--bordeaux);
+    flex: none;
+  }
+  .sync-stato {
+    font-size: 0.74rem;
+    opacity: 0.8;
+  }
+  .sync-stato::before {
+    content: '';
+    display: inline-block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #9fd39a;
+    margin-right: 6px;
+  }
+  .app-testa-dx {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .app-nuova {
+    background: var(--avorio);
+    color: var(--bordeaux);
+    border-color: var(--avorio);
+    min-height: 40px;
+    padding-inline: 1em;
+    font-size: 0.85rem;
+  }
+  .app-nuova:hover {
+    background: white;
+  }
+  .app-nuova,
+  .app-esci {
+    white-space: nowrap;
+  }
+  .solo-stretto {
+    display: none;
+  }
+  @media (max-width: 520px) {
+    .solo-largo {
+      display: none;
+    }
+    .solo-stretto {
+      display: inline;
+    }
+    .app-testa-sx b {
+      font-size: 1rem;
+      white-space: nowrap;
+    }
+  }
+  .app-esci {
+    background: none;
+    border: 1px solid rgba(246, 240, 231, 0.4);
+    color: var(--avorio);
+    border-radius: 999px;
+    padding: 8px 12px;
+    font: inherit;
+    font-size: 0.82rem;
+    cursor: pointer;
+  }
+  .schede {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    padding: 10px var(--gutter) 0;
+    background: var(--avorio);
+    border-bottom: 1px solid var(--linea);
+    position: sticky;
+    top: 62px;
+    z-index: 20;
+  }
+  .schede button {
+    flex: none;
+    background: none;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    padding: 10px 14px 12px;
+    font: 500 0.92rem/1 var(--sans);
+    color: var(--tenue);
+    cursor: pointer;
+  }
+  .schede button[aria-selected='true'] {
+    color: var(--bordeaux);
+    border-color: var(--bordeaux);
+  }
+  .app-corpo {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 24px var(--gutter) 80px;
+  }
+  .app-corpo h2 {
+    font-size: 1.5rem;
+  }
+  .riquadro {
+    background: var(--bianco);
+    border: 1px solid var(--linea);
+    border-radius: 16px;
+    padding: 20px;
+  }
+  .stat {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .stat > div {
+    background: var(--bianco);
+    border: 1px solid var(--linea);
+    border-radius: 16px;
+    padding: 16px 18px;
+    display: grid;
+    gap: 4px;
+  }
+  .stat span {
+    font-size: 0.78rem;
+    color: var(--tenue);
+    letter-spacing: 0.04em;
+  }
+  .stat b {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 2.2rem;
+    line-height: 1;
+    color: var(--bordeaux);
+  }
+  .stat small {
+    font-size: 0.74rem;
+    color: var(--tenue);
+  }
+  .stat i {
+    display: block;
+    height: 6px;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--salvia) var(--p), #eee6db var(--p));
+    margin-top: 6px;
+  }
+  .due {
+    display: grid;
+    gap: 16px;
+  }
+  @media (min-width: 900px) {
+    .due {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .lista {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .lista li {
+    border-top: 1px solid var(--linea);
+  }
+  .lista button,
+  .lista li.libera {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 90px 1fr auto;
+    gap: 12px;
+    align-items: center;
+    padding: 12px 4px;
+    background: none;
+    border: 0;
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+  .lista li.libera {
+    grid-template-columns: 90px 1fr;
+    cursor: default;
+  }
+  .lista button:hover {
+    background: #faf6f0;
+  }
+  .lista-data {
+    font-size: 0.82rem;
+    color: var(--bordeaux);
+    font-weight: 500;
+  }
+  .lista-nome small {
+    display: block;
+    color: var(--tenue);
+    font-size: 0.8rem;
+  }
+  .vuoto {
+    color: var(--tenue);
+    padding: 16px 4px;
+    font-size: 0.9rem;
+  }
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    padding: 3px 9px 3px 7px;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--c) 12%, white);
+    color: color-mix(in srgb, var(--c) 80%, black);
+    white-space: nowrap;
+  }
+  .badge::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--c);
+  }
+
+  /* planning */
+  .pl-barra {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .pl-nav {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .pl-nav button {
+    min-width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    border: 1px solid var(--linea);
+    background: var(--bianco);
+    font: inherit;
+    padding: 0 12px;
+    cursor: pointer;
+  }
+  .pl-nav b {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 1.15rem;
+    margin-left: 8px;
+  }
+  .legenda {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .suggerimento {
+    font-size: 0.82rem;
+    margin-bottom: 12px;
+  }
+  .pl-scorri {
+    overflow-x: auto;
+    background: var(--bianco);
+    border: 1px solid var(--linea);
+    border-radius: 16px;
+  }
+  .pl-griglia {
+    display: grid;
+    grid-template-columns: 110px repeat(var(--n), minmax(42px, 1fr));
+    grid-auto-rows: 64px;
+    min-width: calc(110px + var(--n) * 42px);
+  }
+  .pl-griglia > div:first-child,
+  .pl-giorno {
+    grid-row: 1;
+  }
+  .pl-griglia {
+    grid-template-rows: 54px;
+  }
+  .pl-giorno {
+    display: grid;
+    place-content: center;
+    text-align: center;
+    font-size: 0.95rem;
+    font-weight: 500;
+    border-bottom: 1px solid var(--linea);
+    line-height: 1.1;
+  }
+  .pl-giorno small {
+    font-size: 0.66rem;
+    color: var(--tenue);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-weight: 400;
+  }
+  .pl-giorno.we {
+    background: #faf6f0;
+  }
+  .pl-giorno.oggi {
+    color: var(--bordeaux);
+    box-shadow: inset 0 -3px 0 var(--bordeaux);
+  }
+  .pl-camera {
+    grid-column: 1;
+    position: sticky;
+    left: 0;
+    z-index: 3;
+    background: var(--bianco);
+    border-right: 1px solid var(--linea);
+    border-bottom: 1px solid var(--linea);
+    padding: 10px 12px;
+    display: grid;
+    align-content: center;
+    line-height: 1.2;
+  }
+  .pl-camera b {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 1.05rem;
+  }
+  .pl-camera small {
+    font-size: 0.72rem;
+    color: var(--tenue);
+  }
+  .pl-angolo {
+    position: sticky;
+    left: 0;
+    z-index: 3;
+    background: var(--bianco);
+    border-right: 1px solid var(--linea);
+    border-bottom: 1px solid var(--linea);
+  }
+  .pl-cella {
+    border: 0;
+    border-bottom: 1px solid var(--linea);
+    border-left: 1px solid #f1ebe2;
+    background: transparent;
+    cursor: copy;
+  }
+  .pl-cella:hover:not(.passato) {
+    background: color-mix(in srgb, var(--salvia) 14%, white);
+  }
+  .pl-cella.passato {
+    background: repeating-linear-gradient(-45deg, #faf7f2 0 4px, #f4efe8 4px 8px);
+    cursor: default;
+  }
+  .pl-cella.oggi {
+    box-shadow: inset 2px 0 0 color-mix(in srgb, var(--bordeaux) 40%, transparent);
+  }
+  .pl-barra-pren {
+    z-index: 2;
+    align-self: center;
+    height: 40px;
+    margin: 0 3px 0 calc(50% / 1);
+    border: 0;
+    border-radius: 999px;
+    background: var(--c);
+    color: white;
+    font: 500 0.8rem/1 var(--sans);
+    text-align: left;
+    padding: 0 12px;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 2px 6px -2px rgba(0, 0, 0, 0.3);
+    /* le prenotazioni iniziano a metà del giorno di arrivo e finiscono a metà di quello di partenza */
+    margin-left: 21px;
+    margin-right: -21px;
+    min-width: 0;
+  }
+  .pl-barra-pren span {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .pl-barra-pren.tsx {
+    margin-left: 0;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+  }
+  .pl-barra-pren.tdx {
+    margin-right: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+  }
+  .pl-barra-pren[style*='#8a7f78'] {
+    background: repeating-linear-gradient(-45deg, #8a7f78 0 6px, #9a8f88 6px 12px);
+  }
+
+  /* elenco */
+  .filtri {
+    display: grid;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  @media (min-width: 720px) {
+    .filtri {
+      grid-template-columns: 2fr 1fr 1fr;
+    }
+  }
+  .tabella {
+    background: var(--bianco);
+    border: 1px solid var(--linea);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .t-testa,
+  .t-riga {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1.6fr 0.9fr 0.8fr;
+    gap: 12px;
+    align-items: center;
+    padding: 12px 18px;
+  }
+  .t-testa {
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--tenue);
+    border-bottom: 1px solid var(--linea);
+  }
+  .t-riga {
+    width: 100%;
+    border: 0;
+    border-bottom: 1px solid var(--linea);
+    background: none;
+    font: inherit;
+    font-size: 0.9rem;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+  .t-riga:hover {
+    background: #faf6f0;
+  }
+  .t-riga small {
+    display: block;
+    color: var(--tenue);
+    font-size: 0.76rem;
+  }
+  .t-riga small.pagato {
+    display: inline;
+    color: var(--salvia);
+  }
+  @media (max-width: 760px) {
+    .t-testa {
+      display: none;
+    }
+    .t-riga {
+      grid-template-columns: 1fr auto;
+      gap: 2px 12px;
+    }
+    .t-riga > span:nth-child(2),
+    .t-riga > span:nth-child(3) {
+      grid-column: 1;
+      font-size: 0.82rem;
+      color: var(--tenue);
+    }
+    .t-riga > span:nth-child(4) {
+      grid-column: 2;
+      grid-row: 1;
+      text-align: right;
+    }
+    .t-riga > span:nth-child(5) {
+      grid-column: 2;
+      grid-row: 2 / span 2;
+      justify-self: end;
+    }
+  }
+
+  /* sync */
+  .spiega ol {
+    padding-left: 20px;
+    margin: 0;
+    display: grid;
+    gap: 8px;
+    font-size: 0.92rem;
+  }
+  .sync-camere {
+    display: grid;
+    gap: 14px;
+    margin-top: 14px;
+  }
+  @media (min-width: 900px) {
+    .sync-camere {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .sync-camera {
+    display: grid;
+    gap: 12px;
+  }
+  .sync-camera label {
+    display: grid;
+    gap: 5px;
+    font-size: 0.82rem;
+  }
+  .sync-testa {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .sync-testa h3 {
+    margin: 0;
+    font-size: 1.3rem;
+  }
+  .sync-testa span {
+    font-size: 0.78rem;
+  }
+  .copia {
+    display: flex;
+    gap: 8px;
+  }
+  .copia .btn {
+    min-height: 46px;
+    flex: none;
+  }
+  .sync-azioni {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .sync-azioni .btn {
+    min-height: 42px;
+    font-size: 0.85rem;
+  }
+
+  /* prezzi */
+  .prezzi {
+    display: grid;
+    gap: 10px;
+    max-width: 560px;
+  }
+  .prezzi label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--linea);
+  }
+  .prezzi label small {
+    display: block;
+    color: var(--tenue);
+    font-size: 0.78rem;
+  }
+  .euro {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .euro input {
+    width: 100px;
+    text-align: right;
+  }
+  .prezzi .btn {
+    justify-self: start;
+    margin-top: 8px;
+  }
+  .pericolo {
+    margin-top: 16px;
+  }
+
+  /* finestre */
+  .finestra {
+    border: 0;
+    border-radius: 20px;
+    padding: 24px;
+    width: min(560px, calc(100vw - 24px));
+    max-height: calc(100vh - 24px);
+    background: var(--avorio);
+    color: var(--testo);
+    box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.5);
+  }
+  .finestra::backdrop {
+    background: rgba(42, 28, 25, 0.5);
+  }
+  .finestra h2 {
+    font-size: 1.7rem;
+  }
+  .finestra .campi {
+    display: grid;
+    gap: 12px;
+  }
+  @media (min-width: 520px) {
+    .finestra .campi {
+      grid-template-columns: 1fr 1fr;
+    }
+    .finestra .largo {
+      grid-column: 1 / -1;
+    }
+  }
+  .finestra label {
+    display: grid;
+    gap: 5px;
+    font-size: 0.82rem;
+    color: var(--tenue);
+  }
+  .finestra label[hidden] {
+    display: none;
+  }
+  .finestra-azioni {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+  .dett-testa {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .chiudi {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--linea);
+    background: var(--bianco);
+    font-size: 1.4rem;
+    cursor: pointer;
+  }
+  .dett {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 0;
+  }
+  .dett .largo {
+    grid-column: 1 / -1;
+  }
+  .dett dt {
+    font-size: 0.74rem;
+    color: var(--tenue);
+  }
+  .dett dd {
+    margin: 0;
+    font-size: 1rem;
+  }
+  .dett a {
+    color: var(--bordeaux);
+  }
+  .dett-nota {
+    font-size: 0.85rem;
+    margin-top: 16px;
+    background: var(--bianco);
+    padding: 12px;
+    border-radius: 10px;
+  }
+  .elimina {
+    border-color: #a3242f;
+    color: #a3242f;
+  }
+  .elimina:hover {
+    background: #a3242f;
+    color: white;
+  }
+  .avviso {
+    position: fixed;
+    left: 50%;
+    bottom: 20px;
+    transform: translate(-50%, 120px);
+    background: var(--testo);
+    color: var(--avorio);
+    padding: 12px 18px;
+    border-radius: 999px;
+    font-size: 0.9rem;
+    z-index: 100;
+    transition: transform 0.3s ease;
+    max-width: calc(100vw - 32px);
+  }
+  .avviso.su {
+    transform: translate(-50%, 0);
+  }
+</style>

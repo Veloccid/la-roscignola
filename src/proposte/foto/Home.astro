@@ -1,0 +1,138 @@
+---
+import Foto from '../../components/Foto.astro';
+import Calendario from '../../components/Calendario.astro';
+import BloccoContatti from '../../components/BloccoContatti.astro';
+import { CAMERE } from '../../data/camere';
+import { link } from '../../temi';
+const { tema } = Astro.props;
+---
+
+<section class="quadro primo">
+  <Foto soggetto="Esterno al tramonto (foto a tutto schermo)" tipo="esterno" tinta={['#3e0e16', '#B48F5A']} rapporto="16 / 9" />
+  <div class="velo"></div>
+  <div class="contenitore didascalia">
+    <span class="occhiello">La Roscignola · Bed & Breakfast</span>
+    <h1>Qui si dorme bene.</h1>
+    <a class="btn btn--chiaro" href={link(tema, 'disponibilita')}>Vedi le date libere</a>
+  </div>
+  <a class="giu" href="#camere-foto" aria-label="Scorri alle camere">↓</a>
+</section>
+
+<div id="camere-foto">
+  {
+    CAMERE.map((c, i) => (
+      <section class:list={['quadro', { destra: i % 2 }]}>
+        <Foto soggetto={`${c.nome} (foto a tutto schermo)`} tipo="camera" tinta={[c.tinta[0], '#2a1c19']} rapporto="16 / 9" />
+        <div class="velo"></div>
+        <div class="contenitore didascalia piccola rivela">
+          <span class="occhiello">0{i + 1} — {c.ospiti} ospiti</span>
+          <h2>{c.nome}</h2>
+          <p>{c.breve}</p>
+          <a class="link-chiaro" href={`${link(tema, 'disponibilita')}?camera=${c.id}`}>da {c.prezzo}€ · prenota →</a>
+        </div>
+      </section>
+    ))
+  }
+</div>
+
+<section class="mosaico contenitore sezione">
+  <Foto soggetto="Colazione" tipo="colazione" tinta={['#B48F5A', '#E4D4BD']} rapporto="1 / 1" class="m1" />
+  <Foto soggetto="Giardino" tipo="giardino" tinta={['#7D8A6A', '#E4D4BD']} rapporto="1 / 1" class="m2" />
+  <Foto soggetto="Dettaglio" tipo="dettaglio" tinta={['#7A1F2B', '#E4D4BD']} rapporto="1 / 1" class="m3" />
+  <Foto soggetto="Pergolato" tipo="giardino" tinta={['#5A1520', '#B48F5A']} rapporto="1 / 1" class="m4" />
+  <Foto soggetto="Ingresso" tipo="esterno" tinta={['#B48F5A', '#7A1F2B']} rapporto="1 / 1" class="m5" />
+</section>
+
+<section class="sezione contenitore">
+  <h2>Le date</h2>
+  <Calendario tema={tema} />
+</section>
+
+<BloccoContatti tema={tema} />
+
+<style>
+  .quadro {
+    position: relative;
+    min-height: 100vh;
+    min-height: 100svh;
+    display: flex;
+    align-items: flex-end;
+    color: var(--avorio);
+    overflow: hidden;
+  }
+  .quadro :global(.foto) {
+    position: absolute;
+    inset: 0;
+    aspect-ratio: auto !important;
+    --raggio-foto: 0;
+  }
+  .quadro :global(.foto figcaption) {
+    top: 88px;
+    bottom: auto;
+    left: auto;
+    right: 16px;
+    text-align: right;
+    max-width: 50%;
+  }
+  .velo {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(42, 28, 25, 0.35), transparent 30%, transparent 45%, rgba(42, 28, 25, 0.75));
+  }
+  .didascalia {
+    position: relative;
+    padding-bottom: clamp(72px, 10vh, 120px);
+  }
+  .didascalia .occhiello {
+    color: var(--sabbia);
+  }
+  .primo h1 {
+    font-size: clamp(3rem, 10vw, 8rem);
+    max-width: 10ch;
+  }
+  .piccola {
+    max-width: 560px;
+    margin-left: max(var(--gutter), calc((100vw - var(--max)) / 2 + var(--gutter)));
+    margin-right: auto;
+  }
+  .destra .piccola {
+    margin-left: auto;
+    margin-right: max(0px, calc((100vw - var(--max)) / 2));
+  }
+  .piccola p {
+    font-size: 1.1rem;
+    color: rgba(246, 240, 231, 0.88);
+  }
+  .link-chiaro {
+    color: var(--avorio);
+    font-weight: 500;
+  }
+  .giu {
+    position: absolute;
+    right: var(--gutter);
+    bottom: 32px;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    border: 1px solid rgba(246, 240, 231, 0.6);
+    display: grid;
+    place-content: center;
+    color: var(--avorio);
+    text-decoration: none;
+    font-size: 1.3rem;
+  }
+  .mosaico {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: repeat(2, 1fr);
+  }
+  @media (min-width: 800px) {
+    .mosaico {
+      grid-template-columns: repeat(4, 1fr);
+    }
+    .mosaico :global(.m1) {
+      grid-column: span 2;
+      grid-row: span 2;
+    }
+  }
+</style>

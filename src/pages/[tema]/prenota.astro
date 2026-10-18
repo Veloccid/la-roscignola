@@ -1,0 +1,343 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { SITO } from '../../config';
+import { percorsiTemi, link, type Tema } from '../../temi';
+export function getStaticPaths() {
+  return percorsiTemi();
+}
+const { tema } = Astro.props as { tema: Tema };
+---
+
+<Layout tema={tema} titolo="Prenota" pagina="disponibilita">
+  <section class="sezione contenitore prenota" data-tema={tema.id}>
+    <a class="indietro" href={link(tema.id, 'disponibilita')}>← Torna al calendario</a>
+
+    <div class="prenota-griglia" id="passo-dati">
+      <div>
+        <span class="occhiello">Prenotazione</span>
+        <h1>Quasi fatto</h1>
+        <form id="modulo" novalidate>
+          <div class="campi">
+            <label>Nome e cognome<input name="ospite" required autocomplete="name" /></label>
+            <label>Email<input name="email" type="email" required autocomplete="email" /></label>
+            <label>Telefono<input name="telefono" type="tel" autocomplete="tel" /></label>
+            <label>Ospiti<select name="ospiti" id="ospiti"></select></label>
+            <label class="largo">Note per il proprietario (orario di arrivo, richieste)<textarea name="note" rows="3"></textarea></label>
+          </div>
+          <label class="spunta"><input type="checkbox" name="ok" required /> Ho letto le <a href={link(tema.id, 'condizioni')}>condizioni di prenotazione</a> e la <a href={link(tema.id, 'privacy')}>privacy</a></label>
+          <p class="errore" id="errore" role="alert"></p>
+          <button class="btn paga" type="submit" id="paga">Vai al pagamento</button>
+          <p class="sicuro">🔒 Pagamento con carta, Apple Pay o Google Pay tramite Stripe. <span class="provvisorio">Demo: nessun addebito</span></p>
+        </form>
+      </div>
+      <aside class="riepilogo" id="riepilogo">
+        <p class="tenue">Caricamento…</p>
+      </aside>
+    </div>
+
+    <div class="conferma" id="passo-ok" hidden>
+      <div class="conferma-icona" aria-hidden="true">✓</div>
+      <span class="occhiello">Prenotazione confermata</span>
+      <h1>Grazie, <span id="ok-nome"></span>!</h1>
+      <p>Ti abbiamo inviato la conferma via email. Codice prenotazione <b id="ok-codice"></b>.</p>
+      <p class="tenue">Check‑in {SITO.checkin}. Per qualsiasi cosa rispondi alla mail o scrivici su WhatsApp.</p>
+      <div class="conferma-azioni">
+        <a class="btn" href={link(tema.id)}>Torna alla home</a>
+        <a class="btn btn--vuoto" href="/admin/">Guarda come la vede il proprietario →</a>
+      </div>
+    </div>
+
+    <div class="stripe" id="stripe" hidden>
+      <div class="stripe-box">
+        <div class="stripe-giro"></div>
+        <p>Pagamento sicuro in corso…</p>
+        <small>Nel sito vero qui si apre la pagina di pagamento Stripe</small>
+      </div>
+    </div>
+  </section>
+</Layout>
+
+<script>
+  import { CAMERE } from '../../data/camere';
+  import { carica, libera, prezzo, notti, dataLunga, euro, aggiungi, oggi } from '../../lib/prenotazioni';
+
+  carica();
+  const q = new URLSearchParams(location.search);
+  const cam = CAMERE.find((c) => c.id === q.get('camera'));
+  const dal = q.get('dal') || '';
+  const al = q.get('al') || '';
+  const tema = (document.querySelector('.prenota') as HTMLElement).dataset.tema;
+  const riepilogo = document.getElementById('riepilogo')!;
+  const errore = document.getElementById('errore')!;
+  const paga = document.getElementById('paga') as HTMLButtonElement;
+  const valido = !!cam && /^\d{4}-\d{2}-\d{2}$/.test(dal) && /^\d{4}-\d{2}-\d{2}$/.test(al) && al > dal && dal >= oggi();
+
+  if (!valido) {
+    riepilogo.innerHTML = `<p>Non hai ancora scelto camera e date.</p><a class="btn" href="/${tema}/disponibilita/">Apri il calendario</a>`;
+    paga.disabled = true;
+  } else {
+    const n = notti(dal, al);
+    const tot = prezzo(cam!.id) * n;
+    const sel = document.getElementById('ospiti') as HTMLSelectElement;
+    sel.innerHTML = Array.from({ length: cam!.ospiti }, (_, i) => `<option ${i === Math.min(1, cam!.ospiti - 1) ? 'selected' : ''}>${i + 1}</option>`).join('');
+    const ok = libera(cam!.id, dal, al);
+    riepilogo.innerHTML = `
+      <div class="r-foto" style="--a:${cam!.tinta[0]};--b:${cam!.tinta[1]}"></div>
+      <h3>${cam!.nome}</h3>
+      <p class="tenue">${cam!.letti} · fino a ${cam!.ospiti} ospiti</p>
+      <dl>
+        <div><dt>Arrivo</dt><dd>${dataLunga(dal)}</dd></div>
+        <div><dt>Partenza</dt><dd>${dataLunga(al)}</dd></div>
+      </dl>
+      <p class="r-riga"><span>${n} ${n === 1 ? 'notte' : 'notti'} × ${euro(prezzo(cam!.id))}</span><span>${euro(tot)}</span></p>
+      <p class="r-riga"><span>Colazione</span><span>inclusa</span></p>
+      <p class="r-riga r-tot"><span>Totale</span><b>${euro(tot)}</b></p>
+      <p class="tenue r-tassa">Tassa di soggiorno da pagare in struttura, se prevista.</p>
+      ${ok ? '' : '<p class="errore">Queste date sono appena state prenotate. Torna al calendario per sceglierne altre.</p>'}`;
+    paga.textContent = `Paga ${euro(tot)} e conferma`;
+    if (!ok) paga.disabled = true;
+
+    document.getElementById('modulo')!.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const f = e.target as HTMLFormElement;
+      const d = new FormData(f);
+      errore.textContent = '';
+      if (!String(d.get('ospite')).trim()) return (errore.textContent = 'Inserisci nome e cognome.');
+      if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(String(d.get('email')))) return (errore.textContent = 'Controlla l’indirizzo email.');
+      if (!d.get('ok')) return (errore.textContent = 'Devi accettare condizioni e privacy.');
+      if (!libera(cam!.id, dal, al)) return (errore.textContent = 'Le date non sono più libere.');
+      const stripe = document.getElementById('stripe')!;
+      stripe.hidden = false;
+      setTimeout(() => {
+        const p = aggiungi({
+          camera: cam!.id,
+          dal,
+          al,
+          ospite: String(d.get('ospite')).trim(),
+          email: String(d.get('email')),
+          telefono: String(d.get('telefono') || ''),
+          ospiti: Number(d.get('ospiti')),
+          note: String(d.get('note') || ''),
+          fonte: 'sito',
+          totale: tot,
+          pagato: true,
+        });
+        stripe.hidden = true;
+        document.getElementById('passo-dati')!.hidden = true;
+        document.getElementById('ok-nome')!.textContent = String(d.get('ospite')).split(' ')[0];
+        document.getElementById('ok-codice')!.textContent = 'RSG-' + p.id.slice(0, 6).toUpperCase();
+        document.getElementById('passo-ok')!.hidden = false;
+        window.scrollTo({ top: 0 });
+      }, 1600);
+    });
+  }
+</script>
+
+<style>
+  .indietro {
+    display: inline-block;
+    font-size: 0.9rem;
+    color: var(--tenue);
+    margin-bottom: 24px;
+  }
+  .prenota-griglia {
+    display: grid;
+    gap: 32px;
+    align-items: start;
+  }
+  .prenota-griglia[hidden] {
+    display: none;
+  }
+  @media (min-width: 900px) {
+    .prenota-griglia {
+      grid-template-columns: 1.3fr 1fr;
+      gap: 56px;
+    }
+    .riepilogo {
+      position: sticky;
+      top: 100px;
+    }
+  }
+  .campi {
+    display: grid;
+    gap: 14px;
+    margin-bottom: 16px;
+  }
+  @media (min-width: 600px) {
+    .campi {
+      grid-template-columns: 1fr 1fr;
+    }
+    .largo {
+      grid-column: 1 / -1;
+    }
+  }
+  label {
+    display: grid;
+    gap: 6px;
+    font-size: 0.85rem;
+    color: var(--tenue);
+  }
+  input,
+  select,
+  textarea {
+    font: inherit;
+    font-size: 1rem;
+    color: var(--testo);
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--linea);
+    background: var(--bianco);
+    min-height: 48px;
+  }
+  input:focus,
+  select:focus,
+  textarea:focus {
+    outline: 2px solid var(--oro);
+    outline-offset: 1px;
+  }
+  .spunta {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    font-size: 0.9rem;
+  }
+  .spunta input {
+    min-height: auto;
+    width: 18px;
+    height: 18px;
+    margin-top: 3px;
+    accent-color: var(--bordeaux);
+  }
+  .spunta a {
+    color: var(--bordeaux);
+  }
+  .paga {
+    width: 100%;
+    margin-top: 12px;
+    min-height: 54px;
+    font-size: 1rem;
+  }
+  .sicuro {
+    font-size: 0.82rem;
+    color: var(--tenue);
+    margin-top: 10px;
+  }
+  .riepilogo {
+    background: var(--superficie);
+    border: 1px solid var(--linea);
+    border-radius: calc(var(--raggio) + 4px);
+    padding: 22px;
+    box-shadow: var(--ombra);
+  }
+  .riepilogo :global(.r-foto) {
+    aspect-ratio: 16 / 9;
+    border-radius: 10px;
+    margin-bottom: 16px;
+    background: linear-gradient(150deg, var(--a), var(--b));
+  }
+  .riepilogo :global(h3) {
+    margin-bottom: 4px;
+  }
+  .riepilogo :global(dl) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 16px 0;
+  }
+  .riepilogo :global(dt) {
+    font-size: 0.75rem;
+    color: var(--tenue);
+  }
+  .riepilogo :global(dd) {
+    margin: 0;
+    font-family: var(--serif);
+    font-size: 1.1rem;
+  }
+  .riepilogo :global(.r-riga) {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.92rem;
+    margin: 0 0 6px;
+  }
+  .riepilogo :global(.r-tot) {
+    border-top: 1px solid var(--linea);
+    padding-top: 12px;
+    margin-top: 12px;
+    align-items: baseline;
+  }
+  .riepilogo :global(.r-tot b) {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 1.8rem;
+    color: var(--bordeaux);
+  }
+  .riepilogo :global(.r-tassa) {
+    font-size: 0.78rem;
+  }
+  .errore,
+  .riepilogo :global(.errore) {
+    color: #a3242f;
+    font-size: 0.9rem;
+    min-height: 1em;
+    margin: 6px 0 0;
+  }
+  .conferma {
+    max-width: 640px;
+    margin: 20px auto;
+    text-align: center;
+  }
+  .conferma-icona {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: var(--salvia);
+    color: white;
+    font-size: 2rem;
+    display: grid;
+    place-content: center;
+    margin: 0 auto 20px;
+  }
+  .conferma-azioni {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 24px;
+  }
+  .stripe {
+    position: fixed;
+    inset: 0;
+    background: rgba(42, 28, 25, 0.55);
+    display: grid;
+    place-content: center;
+    z-index: 90;
+    padding: 16px;
+  }
+  .stripe[hidden] {
+    display: none;
+  }
+  .stripe-box {
+    background: white;
+    border-radius: 16px;
+    padding: 32px 28px;
+    text-align: center;
+    max-width: 340px;
+  }
+  .stripe-box small {
+    color: var(--tenue);
+  }
+  .stripe-giro {
+    width: 42px;
+    height: 42px;
+    margin: 0 auto 14px;
+    border-radius: 50%;
+    border: 3px solid #e7e0f8;
+    border-top-color: #635bff;
+    animation: giro 0.8s linear infinite;
+  }
+  @keyframes giro {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+</style>

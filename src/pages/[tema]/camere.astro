@@ -1,0 +1,111 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import SchedaCamera from '../../components/SchedaCamera.astro';
+import BloccoContatti from '../../components/BloccoContatti.astro';
+import Foto from '../../components/Foto.astro';
+import { CAMERE, SERVIZI_CASA } from '../../data/camere';
+import { percorsiTemi, link, type Tema } from '../../temi';
+export function getStaticPaths() {
+  return percorsiTemi();
+}
+const { tema } = Astro.props as { tema: Tema };
+---
+
+<Layout tema={tema} titolo="Camere" pagina="camere">
+  <section class="sezione contenitore intestazione">
+    <span class="occhiello">Le camere</span>
+    <h1>Quattro camere, <span class="corsivo">ognuna con il suo carattere</span></h1>
+    <p class="tenue">Tutte con bagno privato, aria condizionata e Wi‑Fi. Colazione fatta in casa inclusa. <span class="provvisorio">Testo provvisorio</span></p>
+  </section>
+
+  <section class="contenitore elenco">
+    {
+      CAMERE.map((c, i) => (
+        <article class:list={['camera-riga rivela', { inversa: i % 2 }]} id={c.id}>
+          <Foto soggetto={c.nome} tipo="camera" tinta={c.tinta} rapporto="5 / 4" />
+          <div>
+            <p class="meta">{c.piano} · {c.mq} m² · fino a {c.ospiti} ospiti · {c.letti}</p>
+            <h2>{c.nome}</h2>
+            <p>{c.descrizione}</p>
+            <ul class="servizi">{c.servizi.map((s) => <li>{s}</li>)}</ul>
+            <p class="prezzo"><span>da</span> {c.prezzo}€ <span>a notte, colazione inclusa</span></p>
+            <a class="btn" href={`${link(tema.id, 'disponibilita')}?camera=${c.id}`}>Vedi date e prenota</a>
+          </div>
+        </article>
+      ))
+    }
+  </section>
+
+  <section class="sezione contenitore">
+    <h2>In tutta la casa</h2>
+    <div class="griglia servizi-casa">
+      {SERVIZI_CASA.map((s) => (
+        <div><h3>{s.titolo}</h3><p class="tenue">{s.testo}</p></div>
+      ))}
+    </div>
+  </section>
+
+  <BloccoContatti tema={tema.id} />
+</Layout>
+
+<style>
+  .intestazione {
+    padding-bottom: 24px;
+    max-width: 900px;
+    margin-left: max(0px, calc((100vw - var(--max)) / 2));
+  }
+  .elenco {
+    display: grid;
+    gap: clamp(48px, 8vw, 96px);
+  }
+  .camera-riga {
+    display: grid;
+    gap: clamp(20px, 4vw, 56px);
+    align-items: center;
+  }
+  @media (min-width: 860px) {
+    .camera-riga {
+      grid-template-columns: 1.1fr 1fr;
+    }
+    .camera-riga.inversa > :first-child {
+      order: 2;
+    }
+  }
+  .meta {
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--tenue);
+  }
+  .servizi {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 0 20px;
+  }
+  .servizi li {
+    font-size: 0.8rem;
+    padding: 5px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--linea);
+    background: var(--superficie);
+  }
+  .prezzo {
+    font-family: var(--serif);
+    font-size: 2rem;
+    color: var(--bordeaux);
+  }
+  .prezzo span {
+    font-family: var(--sans);
+    font-size: 0.85rem;
+    color: var(--tenue);
+  }
+  .servizi-casa {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+  .servizi-casa h3 {
+    font-size: 1.25rem;
+  }
+</style>

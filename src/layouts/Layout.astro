@@ -1,0 +1,341 @@
+---
+import '../styles/global.css';
+import Logo from '../components/Logo.astro';
+import { SITO, linkWhatsApp } from '../config';
+import { type Tema, link } from '../temi';
+
+interface Props {
+  tema: Tema;
+  titolo?: string;
+  descrizione?: string;
+  pagina?: string;
+  trasparente?: boolean; // header sopra l'immagine di apertura
+}
+const { tema, titolo, descrizione = SITO.descrizione, pagina = '', trasparente = false } = Astro.props;
+const titoloPagina = titolo ? `${titolo} · ${SITO.nome}` : SITO.titolo;
+const voci = [
+  { href: link(tema.id), nome: 'Home', id: '' },
+  { href: link(tema.id, 'camere'), nome: 'Camere', id: 'camere' },
+  { href: link(tema.id, 'disponibilita'), nome: 'Disponibilità', id: 'disponibilita' },
+  { href: link(tema.id, 'contatti'), nome: 'Contatti', id: 'contatti' },
+];
+const anno = new Date().getFullYear();
+---
+
+<!doctype html>
+<html lang="it" data-tema={tema.id}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>{titoloPagina}</title>
+    <meta name="description" content={descrizione} />
+    <meta name="theme-color" content="#7a1f2b" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={titoloPagina} />
+    <meta property="og:description" content={descrizione} />
+    <meta property="og:locale" content="it_IT" />
+    <meta property="og:url" content={new URL(Astro.url.pathname, SITO.url).href} />
+  </head>
+  <body>
+    <a class="vai-contenuto" href="#contenuto">Vai al contenuto</a>
+    <header class:list={['testata', { 'testata--trasparente': trasparente }]}>
+      <div class="contenitore testata-riga">
+        <a class="testata-logo" href={link(tema.id)} aria-label="La Roscignola, torna alla home">
+          <Logo />
+        </a>
+        <nav class="menu-desk" aria-label="Menu principale">
+          {voci.map((v) => <a href={v.href} aria-current={v.id === pagina ? 'page' : undefined}>{v.nome}</a>)}
+          <a class="btn" href={link(tema.id, 'disponibilita')}>Prenota</a>
+        </nav>
+        <details class="menu-mob">
+          <summary aria-label="Apri il menu"><span></span><span></span><span></span></summary>
+          <nav aria-label="Menu mobile">
+            {voci.map((v) => <a href={v.href} aria-current={v.id === pagina ? 'page' : undefined}>{v.nome}</a>)}
+            <a class="btn" href={link(tema.id, 'disponibilita')}>Prenota le tue date</a>
+          </nav>
+        </details>
+      </div>
+    </header>
+
+    <main id="contenuto">
+      <slot />
+    </main>
+
+    <footer class="piede">
+      <div class="contenitore piede-griglia">
+        <div>
+          <Logo class="piede-logo" />
+          <p class="tenue-chiaro">{SITO.tipo} · {SITO.zona}</p>
+        </div>
+        <div>
+          <h4>Contatti</h4>
+          <p>
+            <a href={linkWhatsApp('Ciao! Vorrei informazioni sul B&B La Roscignola.')}>WhatsApp</a><br />
+            <a href={`mailto:${SITO.email}`}>{SITO.email}</a><br />
+            {SITO.indirizzo}
+          </p>
+        </div>
+        <div>
+          <h4>Soggiorno</h4>
+          <p>Check‑in {SITO.checkin}<br />Check‑out {SITO.checkout}</p>
+          <p class="piede-canali">
+            Ci trovi anche su <a href={SITO.canali.airbnb}>Airbnb</a> e <a href={SITO.canali.booking}>Booking</a>
+          </p>
+        </div>
+        <div>
+          <h4>Info</h4>
+          <p>
+            <a href={link(tema.id, 'privacy')}>Privacy e cookie</a><br />
+            <a href={link(tema.id, 'condizioni')}>Condizioni di prenotazione</a><br />
+            <a href="/admin/">Area proprietario</a>
+          </p>
+        </div>
+      </div>
+      <div class="contenitore piede-fondo">
+        <span>© {anno} {SITO.nome} · {SITO.piva} · {SITO.cin}</span>
+        <span>Sito di VeeDee Agency</span>
+      </div>
+    </footer>
+
+    <a class="pillola" href="/">
+      <b>Proposta {tema.lettera}</b>: {tema.nome} <span>· Cambia</span>
+    </a>
+
+    <script>
+      const els = document.querySelectorAll('.rivela');
+      if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver(
+          (entries) =>
+            entries.forEach((e) => {
+              if (e.isIntersecting) {
+                e.target.classList.add('visibile');
+                io.unobserve(e.target);
+              }
+            }),
+          { rootMargin: '0px 0px -8% 0px' },
+        );
+        els.forEach((el) => io.observe(el));
+      } else els.forEach((el) => el.classList.add('visibile'));
+
+      const testata = document.querySelector('.testata');
+      const suScroll = () => testata?.classList.toggle('scorsa', window.scrollY > 40);
+      suScroll();
+      window.addEventListener('scroll', suScroll, { passive: true });
+    </script>
+  </body>
+</html>
+
+<style>
+  .testata {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: color-mix(in srgb, var(--fondo) 90%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--linea);
+    color: var(--bordeaux);
+    transition: background 0.3s ease, color 0.3s ease, border-color 0.3s;
+  }
+  .testata--trasparente {
+    position: fixed;
+    inset: 0 0 auto 0;
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-color: transparent;
+    color: var(--avorio);
+  }
+  .testata--trasparente.scorsa {
+    background: color-mix(in srgb, var(--avorio) 92%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-color: var(--linea);
+    color: var(--bordeaux);
+  }
+  .testata--trasparente :global(.logo-occhio) {
+    fill: var(--bordeaux);
+  }
+  .testata--trasparente.scorsa :global(.logo-occhio) {
+    fill: var(--avorio);
+  }
+  .testata--trasparente .menu-desk .btn {
+    background: var(--avorio);
+    color: var(--bordeaux);
+    border-color: var(--avorio);
+  }
+  .testata--trasparente.scorsa .menu-desk .btn {
+    background: var(--bordeaux);
+    color: var(--avorio);
+    border-color: var(--bordeaux);
+  }
+  .testata-riga {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    min-height: 72px;
+  }
+  .testata-logo {
+    display: block;
+    width: clamp(150px, 18vw, 200px);
+    color: inherit;
+  }
+  .menu-desk {
+    display: none;
+    align-items: center;
+    gap: clamp(16px, 2.4vw, 32px);
+  }
+  .menu-desk a:not(.btn) {
+    text-decoration: none;
+    font-size: 0.95rem;
+    letter-spacing: 0.04em;
+    padding-block: 6px;
+    border-bottom: 1px solid transparent;
+  }
+  .menu-desk a:not(.btn):hover,
+  .menu-desk a[aria-current='page'] {
+    border-color: currentColor;
+  }
+  .menu-desk .btn {
+    min-height: 42px;
+    padding-inline: 1.3em;
+  }
+  .menu-mob summary {
+    list-style: none;
+    cursor: pointer;
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-content: center;
+    gap: 6px;
+  }
+  .menu-mob summary::-webkit-details-marker {
+    display: none;
+  }
+  .menu-mob summary span {
+    display: block;
+    width: 24px;
+    height: 1.5px;
+    background: currentColor;
+    transition: transform 0.25s;
+  }
+  .menu-mob[open] summary span:nth-child(1) {
+    transform: translateY(7.5px) rotate(45deg);
+  }
+  .menu-mob[open] summary span:nth-child(2) {
+    opacity: 0;
+  }
+  .menu-mob[open] summary span:nth-child(3) {
+    transform: translateY(-7.5px) rotate(-45deg);
+  }
+  .menu-mob nav {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    background: var(--avorio);
+    color: var(--bordeaux);
+    display: grid;
+    gap: 4px;
+    padding: 12px var(--gutter) 24px;
+    border-bottom: 1px solid var(--linea);
+    box-shadow: 0 20px 30px -20px rgba(0, 0, 0, 0.25);
+  }
+  .menu-mob nav a:not(.btn) {
+    font-family: var(--serif);
+    font-size: 1.6rem;
+    text-decoration: none;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--linea);
+  }
+  .menu-mob nav .btn {
+    margin-top: 14px;
+  }
+  @media (min-width: 900px) {
+    .menu-desk {
+      display: flex;
+    }
+    .menu-mob {
+      display: none;
+    }
+  }
+
+  .piede {
+    background: var(--bordeaux-scuro);
+    color: var(--avorio);
+    padding: 64px 0 96px;
+    margin-top: 0;
+  }
+  .piede :global(.logo-occhio) {
+    fill: var(--bordeaux-scuro);
+  }
+  .piede-griglia {
+    display: grid;
+    gap: 32px;
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 760px) {
+    .piede-griglia {
+      grid-template-columns: 1.4fr 1fr 1fr 1fr;
+    }
+  }
+  .piede :global(.piede-logo) {
+    width: 200px;
+    margin-bottom: 12px;
+  }
+  .piede h4 {
+    font-family: var(--sans);
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--oro);
+    font-weight: 500;
+  }
+  .piede p {
+    font-size: 0.95rem;
+    color: rgba(246, 240, 231, 0.85);
+  }
+  .piede a {
+    color: var(--avorio);
+    text-underline-offset: 3px;
+    text-decoration-color: rgba(246, 240, 231, 0.35);
+  }
+  .tenue-chiaro {
+    color: rgba(246, 240, 231, 0.6) !important;
+  }
+  .piede-fondo {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(246, 240, 231, 0.15);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: rgba(246, 240, 231, 0.55);
+  }
+
+  .pillola {
+    position: fixed;
+    left: 12px;
+    bottom: 12px;
+    z-index: 60;
+    background: var(--testo);
+    color: var(--avorio);
+    font-size: 0.8rem;
+    padding: 9px 14px;
+    border-radius: 999px;
+    text-decoration: none;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+    max-width: calc(100vw - 24px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .pillola span {
+    color: var(--oro);
+  }
+</style>

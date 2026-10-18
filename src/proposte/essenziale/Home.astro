@@ -1,0 +1,119 @@
+---
+import Foto from '../../components/Foto.astro';
+import SchedaCamera from '../../components/SchedaCamera.astro';
+import Calendario from '../../components/Calendario.astro';
+import BloccoContatti from '../../components/BloccoContatti.astro';
+import { CAMERE, SERVIZI_CASA } from '../../data/camere';
+import { link } from '../../temi';
+const { tema } = Astro.props;
+---
+
+<section class="contenitore apertura">
+  <div class="apertura-testo">
+    <span class="occhiello">Bed & Breakfast</span>
+    <h1>Dormire dove canta <span class="corsivo">l’usignolo</span></h1>
+    <p class="tenue">Quattro camere, una colazione fatta in casa e un giardino silenzioso. Scegli le date libere e prenota in due minuti. <span class="provvisorio">Testo provvisorio</span></p>
+    <div class="azioni">
+      <a class="btn" href={link(tema, 'disponibilita')}>Vedi le date libere</a>
+      <a class="btn btn--vuoto" href={link(tema, 'camere')}>Le camere</a>
+    </div>
+  </div>
+  <Foto soggetto="Esterno della casa" tipo="esterno" rapporto="5 / 4" class="apertura-foto" />
+</section>
+
+<section class="sezione contenitore">
+  <div class="titolo-riga">
+    <h2>Le camere</h2>
+    <a href={link(tema, 'camere')}>Tutte le camere →</a>
+  </div>
+  <div class="griglia camere">{CAMERE.map((c) => <SchedaCamera camera={c} tema={tema} class="rivela" />)}</div>
+</section>
+
+<section class="sezione cal-sezione">
+  <div class="contenitore">
+    <h2>Quando vuoi venire?</h2>
+    <p class="tenue">Verde: libero. Barrato: già prenotato. I giorni sono aggiornati anche con Airbnb e Booking.</p>
+    <Calendario tema={tema} />
+  </div>
+</section>
+
+<section class="sezione contenitore servizi">
+  <Foto soggetto="La colazione" tipo="colazione" tinta={['#B48F5A', '#E4D4BD']} rapporto="1 / 1" />
+  <div>
+    <h2>Piccole cose che fanno la differenza</h2>
+    <dl>
+      {SERVIZI_CASA.map((s) => (
+        <div><dt>{s.titolo}</dt><dd>{s.testo}</dd></div>
+      ))}
+    </dl>
+  </div>
+</section>
+
+<BloccoContatti tema={tema} />
+
+<style>
+  .apertura {
+    display: grid;
+    gap: 32px;
+    align-items: center;
+    padding-block: clamp(32px, 6vw, 80px);
+  }
+  @media (min-width: 900px) {
+    .apertura {
+      grid-template-columns: 1fr 1.1fr;
+      gap: 64px;
+    }
+  }
+  .apertura-testo p {
+    font-size: 1.1rem;
+    max-width: 44ch;
+  }
+  .azioni {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 24px;
+  }
+  .titolo-riga {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .titolo-riga a {
+    color: var(--bordeaux);
+  }
+  .camere {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    margin-top: 24px;
+  }
+  .cal-sezione {
+    background: var(--sabbia);
+  }
+  .servizi {
+    display: grid;
+    gap: 40px;
+    align-items: center;
+  }
+  @media (min-width: 860px) {
+    .servizi {
+      grid-template-columns: 1fr 1.2fr;
+      gap: 72px;
+    }
+  }
+  dl {
+    margin: 24px 0 0;
+    display: grid;
+    gap: 18px;
+  }
+  dt {
+    font-family: var(--serif);
+    font-size: 1.3rem;
+    color: var(--bordeaux);
+  }
+  dd {
+    margin: 0;
+    color: var(--tenue);
+  }
+</style>

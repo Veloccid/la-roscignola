@@ -1,0 +1,43 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Calendario from '../../components/Calendario.astro';
+import { SITO, linkWhatsApp } from '../../config';
+import { percorsiTemi, type Tema } from '../../temi';
+export function getStaticPaths() {
+  return percorsiTemi();
+}
+const { tema } = Astro.props as { tema: Tema };
+---
+
+<Layout tema={tema} titolo="Disponibilità e prenotazioni" pagina="disponibilita">
+  <section class="sezione contenitore">
+    <span class="occhiello">Disponibilità</span>
+    <h1>Scegli le tue date</h1>
+    <p class="tenue intro">
+      Il calendario è aggiornato con le prenotazioni di Airbnb, Booking e del sito. Scegli arrivo e partenza, poi paghi online in modo sicuro.
+    </p>
+    <Calendario tema={tema.id} />
+    <div class="info">
+      <p><b>Check‑in</b> {SITO.checkin} · <b>Check‑out</b> {SITO.checkout}</p>
+      <p>Hai esigenze particolari o vuoi più notti? <a href={linkWhatsApp('Ciao! Vorrei chiedere la disponibilità per queste date: ')}>Scrivici su WhatsApp</a></p>
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .intro {
+    max-width: 60ch;
+    margin-bottom: 28px;
+  }
+  .info {
+    margin-top: 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 32px;
+    font-size: 0.92rem;
+    color: var(--tenue);
+  }
+  .info a {
+    color: var(--bordeaux);
+  }
+</style>

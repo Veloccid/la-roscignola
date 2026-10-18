@@ -1,0 +1,258 @@
+---
+import Logo from '../../components/Logo.astro';
+import Foto from '../../components/Foto.astro';
+import Calendario from '../../components/Calendario.astro';
+import BloccoContatti from '../../components/BloccoContatti.astro';
+import { CAMERE } from '../../data/camere';
+import { link } from '../../temi';
+const { tema } = Astro.props;
+const parole = ['Ascolta.', 'All’alba,', 'in giardino,', 'canta l’usignolo.'];
+---
+
+<section class="scena" data-scena>
+  <div class="scena-fissa">
+    <div class="note" aria-hidden="true">
+      {Array.from({ length: 14 }, (_, i) => <i style={`--i:${i}`}></i>)}
+    </div>
+    <div class="marchio-wrap">
+      <Logo variante="marchio" class="marchio" titolo="La Roscignola" />
+    </div>
+    <p class="parole" aria-label={parole.join(' ')}>
+      {parole.map((w, i) => <span style={`--i:${i}`} aria-hidden="true">{w}</span>)}
+    </p>
+    <div class="finale">
+      <Logo class="parola" />
+      <p>Bed & Breakfast · quattro camere sul giardino</p>
+      <a class="btn btn--chiaro" href={link(tema, 'disponibilita')}>Scegli le tue date</a>
+    </div>
+    <div class="scorri" aria-hidden="true">Scorri</div>
+  </div>
+</section>
+
+<section class="sezione contenitore intro">
+  <span class="occhiello">La casa</span>
+  <h2>Un nome che è un canto</h2>
+  <p>
+    Roscignola è l’usignolo nel dialetto di qui. Lo trovi nel logo, sulla R, e lo senti davvero al mattino dalle finestre. Quattro camere,
+    colazione fatta in casa e il tempo che rallenta. <span class="provvisorio">Testo provvisorio</span>
+  </p>
+</section>
+
+<section class="contenitore camere">
+  {
+    CAMERE.map((c, i) => (
+      <article class="cam rivela" style={`--d:${i * 80}ms`}>
+        <svg class="piuma" viewBox="0 0 200 40" aria-hidden="true">
+          <path d="M2 30 C 60 30, 120 4, 198 8" />
+        </svg>
+        <Foto soggetto={c.nome} tipo="camera" tinta={c.tinta} rapporto="3 / 4" />
+        <h3>{c.nome}</h3>
+        <p class="tenue">{c.breve}</p>
+        <a href={`${link(tema, 'disponibilita')}?camera=${c.id}`}>da {c.prezzo}€ · date libere →</a>
+      </article>
+    ))
+  }
+</section>
+
+<section class="sezione contenitore">
+  <h2>Quando vieni ad ascoltarlo?</h2>
+  <Calendario tema={tema} />
+</section>
+
+<BloccoContatti tema={tema} />
+
+<script>
+  const scene = document.querySelectorAll<HTMLElement>('[data-scena]');
+  const ridotto = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function aggiorna() {
+    scene.forEach((s) => {
+      const r = s.getBoundingClientRect();
+      const tot = s.offsetHeight - innerHeight;
+      const p = ridotto ? 1 : Math.min(1, Math.max(0, -r.top / tot));
+      s.style.setProperty('--p', p.toFixed(4));
+    });
+  }
+  aggiorna();
+  addEventListener('scroll', () => requestAnimationFrame(aggiorna), { passive: true });
+  addEventListener('resize', aggiorna);
+</script>
+
+<style>
+  .scena {
+    --p: 0;
+    height: 320vh;
+    background: var(--bordeaux-scuro);
+    color: var(--avorio);
+    position: relative;
+  }
+  .scena-fissa {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100svh;
+    overflow: hidden;
+    display: grid;
+    place-items: center;
+    background:
+      radial-gradient(60% 50% at 50% calc(70% - var(--p) * 40%), rgba(180, 143, 90, calc(0.1 + var(--p) * 0.25)), transparent 70%),
+      linear-gradient(180deg, #3e0e16, var(--bordeaux) calc(60% + var(--p) * 40%));
+  }
+  .marchio-wrap {
+    position: absolute;
+    width: min(420px, 62vw);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -55%) scale(calc(1 - clamp(0, (var(--p) - 0.6) * 2.5, 1) * 0.45))
+      translateY(calc(clamp(0, (var(--p) - 0.6) * 2.5, 1) * -42vh));
+    opacity: calc(1 - clamp(0, (var(--p) - 0.75) * 6, 1));
+  }
+  .marchio-wrap :global(.marchio) {
+    width: 100%;
+    color: var(--avorio);
+    --logo-occhio: var(--bordeaux-scuro);
+  }
+  .marchio-wrap :global(.logo-font),
+  .marchio-wrap :global(path:not(.logo-piume path)) {
+    opacity: clamp(0.15, var(--p) * 6, 1);
+  }
+  .marchio-wrap :global(.logo-piume path) {
+    stroke: var(--avorio);
+    stroke-width: 1.2;
+    stroke-dasharray: 1;
+    stroke-dashoffset: calc(1 - clamp(0, var(--p) * 2.4, 1));
+    fill-opacity: clamp(0, (var(--p) - 0.3) * 4, 1);
+  }
+  .parole {
+    position: absolute;
+    bottom: 16%;
+    left: 0;
+    right: 0;
+    text-align: center;
+    margin: 0;
+    padding-inline: 16px;
+    font-family: var(--serif);
+    font-style: italic;
+    font-size: clamp(1.6rem, 4.2vw, 3rem);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0 0.35em;
+    opacity: calc(1 - clamp(0, (var(--p) - 0.62) * 8, 1));
+  }
+  .parole span {
+    opacity: clamp(0.08, (var(--p) * 10 - var(--i) * 1.3 - 0.4), 1);
+    transform: translateY(calc((1 - clamp(0, var(--p) * 10 - var(--i) * 1.3 - 0.4, 1)) * 14px));
+  }
+  .finale {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    text-align: center;
+    gap: 16px;
+    padding-inline: 16px;
+    opacity: clamp(0, (var(--p) - 0.75) * 5, 1);
+    transform: translateY(calc((1 - clamp(0, (var(--p) - 0.75) * 5, 1)) * 30px));
+    pointer-events: none;
+  }
+  .scena[style*='--p: 1'] .finale,
+  .scena[style*='--p: 0.9'] .finale,
+  .scena[style*='--p: 0.8'] .finale {
+    pointer-events: auto;
+  }
+  .finale :global(.parola) {
+    width: min(620px, 86vw);
+    color: var(--avorio);
+    --logo-occhio: var(--bordeaux);
+  }
+  .finale p {
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    color: var(--sabbia);
+    margin: 0;
+  }
+  .note i {
+    position: absolute;
+    left: calc(8% + var(--i) * 6.4%);
+    bottom: calc(-10% + var(--p) * (60% + var(--i) * 4%));
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--oro);
+    opacity: calc(0.15 + var(--p) * 0.5);
+    filter: blur(0.5px);
+    transform: translateX(calc(sin(var(--i) * 1rad) * 40px));
+  }
+  .note i:nth-child(3n) {
+    width: 3px;
+    height: 3px;
+  }
+  .scorri {
+    position: absolute;
+    bottom: 22px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    opacity: calc(0.7 - var(--p) * 4);
+  }
+  .scorri::after {
+    content: '';
+    display: block;
+    width: 1px;
+    height: 34px;
+    margin: 8px auto 0;
+    background: currentColor;
+    animation: giu 1.8s ease-in-out infinite;
+    transform-origin: top;
+  }
+  @keyframes giu {
+    0%,
+    100% {
+      transform: scaleY(0.3);
+    }
+    50% {
+      transform: scaleY(1);
+    }
+  }
+  .intro {
+    max-width: 760px;
+    text-align: center;
+  }
+  .intro p {
+    font-size: 1.15rem;
+  }
+  .camere {
+    display: grid;
+    gap: 28px;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  }
+  .cam {
+    transition-delay: var(--d);
+  }
+  .cam:nth-child(even) {
+    margin-top: 48px;
+  }
+  .piuma {
+    width: 70%;
+    height: 22px;
+    fill: none;
+    stroke: var(--oro);
+    stroke-width: 1.3;
+    margin-bottom: 8px;
+  }
+  .cam h3 {
+    margin-top: 16px;
+  }
+  .cam a {
+    color: var(--bordeaux);
+    font-weight: 500;
+    font-size: 0.92rem;
+  }
+  @media (max-width: 600px) {
+    .cam:nth-child(even) {
+      margin-top: 0;
+    }
+  }
+</style>

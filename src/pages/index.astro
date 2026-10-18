@@ -1,0 +1,196 @@
+---
+import '../styles/global.css';
+import Logo from '../components/Logo.astro';
+import { TEMI, link } from '../temi';
+---
+
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Proposte per il sito · La Roscignola</title>
+    <meta name="description" content="Dieci proposte grafiche per il sito del B&B La Roscignola." />
+    <meta property="og:title" content="Proposte per il sito · La Roscignola" />
+    <meta property="og:description" content="Dieci proposte grafiche per il sito del B&B La Roscignola." />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body>
+    <main class="scelta">
+      <header class="contenitore scelta-testa">
+        <Logo class="scelta-logo" />
+        <p class="occhiello">Proposte per il sito</p>
+        <h1>Dieci modi di raccontare <span class="corsivo">La Roscignola</span></h1>
+        <p class="tenue intro">
+          Tutte le proposte hanno gli stessi colori, gli stessi testi e lo stesso sistema di prenotazione: calendario con i giorni liberi,
+          pagamento online e area del proprietario. Cambiano impaginazione, movimento e interazione. Quelle con ✦ hanno l’effetto wow.
+        </p>
+        <div class="palette" aria-label="Palette colori">
+          <span style="--c:#7a1f2b">Bordeaux<br /><small>#7A1F2B</small></span>
+          <span style="--c:#f6f0e7;--t:#2a1c19">Avorio<br /><small>#F6F0E7</small></span>
+          <span style="--c:#e4d4bd;--t:#2a1c19">Sabbia<br /><small>#E4D4BD</small></span>
+          <span style="--c:#7d8a6a">Salvia<br /><small>#7D8A6A</small></span>
+          <span style="--c:#b48f5a">Oro antico<br /><small>#B48F5A</small></span>
+          <span style="--c:#2a1c19">Bruno<br /><small>#2A1C19</small></span>
+        </div>
+      </header>
+
+      <ol class="contenitore elenco">
+        {
+          TEMI.map((t) => (
+            <li>
+              <a href={link(t.id)}>
+                <span class="lettera">{t.lettera}</span>
+                <span class="testo">
+                  <b>
+                    {t.nome}
+                    {t.wow && <em> ✦</em>}
+                  </b>
+                  <span>{t.idea}</span>
+                </span>
+                <span class="apri">Apri la proposta →</span>
+              </a>
+            </li>
+          ))
+        }
+      </ol>
+
+      <section class="contenitore admin-box">
+        <div>
+          <h2>Area proprietario</h2>
+          <p class="tenue">
+            Calendario delle camere, prenotazioni da sito, Airbnb e Booking, date bloccate, prezzi. È la stessa per tutte le proposte.
+            <br />Password demo: <b>roscignola</b>
+          </p>
+        </div>
+        <a class="btn" href="/admin/">Apri l’area proprietario</a>
+      </section>
+      <p class="contenitore nota">
+        <span class="provvisorio">Demo</span> Logo ricostruito in attesa del file originale · foto e testi provvisori · le prenotazioni di prova restano solo nel tuo browser.
+      </p>
+    </main>
+  </body>
+</html>
+
+<style>
+  .scelta {
+    padding-block: clamp(40px, 7vw, 90px);
+  }
+  .scelta-testa {
+    max-width: 900px;
+  }
+  .scelta :global(.scelta-logo) {
+    width: min(320px, 70vw);
+    color: var(--bordeaux);
+    margin-bottom: 36px;
+  }
+  .intro {
+    max-width: 62ch;
+  }
+  .palette {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 8px;
+    margin: 28px 0 48px;
+  }
+  .palette span {
+    background: var(--c);
+    color: var(--t, #f6f0e7);
+    border-radius: 10px;
+    padding: 34px 12px 10px;
+    font-size: 0.82rem;
+    line-height: 1.25;
+    border: 1px solid var(--linea);
+  }
+  .palette small {
+    opacity: 0.75;
+    font-size: 0.7rem;
+  }
+  .elenco {
+    list-style: none;
+    margin-block: 0 56px;
+    display: grid;
+    gap: 10px;
+  }
+  .elenco a {
+    display: grid;
+    grid-template-columns: 56px 1fr;
+    gap: 6px 18px;
+    align-items: center;
+    background: var(--bianco);
+    border: 1px solid var(--linea);
+    border-radius: 16px;
+    padding: 18px 20px;
+    text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  }
+  .elenco a:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--ombra);
+    border-color: var(--bordeaux);
+  }
+  .lettera {
+    grid-row: span 2;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--bordeaux);
+    color: var(--avorio);
+    display: grid;
+    place-content: center;
+    font-family: var(--serif);
+    font-size: 1.6rem;
+  }
+  .testo {
+    display: grid;
+    gap: 2px;
+  }
+  .testo b {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 1.35rem;
+  }
+  .testo em {
+    color: var(--oro);
+    font-style: normal;
+  }
+  .testo > span {
+    color: var(--tenue);
+    font-size: 0.95rem;
+  }
+  .apri {
+    font-size: 0.85rem;
+    color: var(--bordeaux);
+    font-weight: 500;
+  }
+  @media (min-width: 760px) {
+    .elenco a {
+      grid-template-columns: 56px 1fr auto;
+    }
+    .lettera {
+      grid-row: auto;
+    }
+  }
+  .admin-box {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    background: var(--sabbia);
+    border-radius: 20px;
+    padding-block: 28px;
+  }
+  .admin-box h2 {
+    font-size: 1.8rem;
+  }
+  .admin-box p {
+    margin: 0;
+  }
+  .nota {
+    margin-top: 24px;
+    font-size: 0.85rem;
+    color: var(--tenue);
+  }
+</style>

@@ -1,0 +1,524 @@
+---
+// Calendario disponibilità: giorni liberi/occupati per camera, scelta date e prezzo.
+// I dati arrivano da src/lib/prenotazioni.ts (demo nel browser, nel sito vero dal database).
+import { CAMERE } from '../data/camere';
+interface Props {
+  tema: string;
+  camera?: string;
+  mesi?: 1 | 2;
+  class?: string;
+}
+const { tema, camera = '', mesi = 2, class: classe = '' } = Astro.props;
+---
+
+<rs-calendario class:list={['cal', classe]} data-tema={tema} data-camera={camera} data-mesi={mesi}>
+  <div class="cal-camere" role="group" aria-label="Scegli la camera">
+    <button type="button" data-cam="" aria-pressed={camera === '' ? 'true' : 'false'}>Tutte le camere</button>
+    {
+      CAMERE.map((c) => (
+        <button type="button" data-cam={c.id} aria-pressed={camera === c.id ? 'true' : 'false'}>
+          {c.nome.replace('Camera ', '')}
+        </button>
+      ))
+    }
+  </div>
+  <div class="cal-corpo">
+    <div class="cal-mesi-wrap">
+      <div class="cal-nav">
+        <button type="button" class="cal-freccia" data-dir="-1" aria-label="Mese precedente">‹</button>
+        <span class="cal-aiuto" aria-live="polite">Scegli il giorno di arrivo</span>
+        <button type="button" class="cal-freccia" data-dir="1" aria-label="Mese successivo">›</button>
+      </div>
+      <div class="cal-mesi"></div>
+      <div class="cal-legenda">
+        <span><i class="l-libero"></i>Libero</span>
+        <span class="solo-tutte"><i class="l-parziale"></i>Alcune camere libere</span>
+        <span><i class="l-pieno"></i>Occupato</span>
+        <span><i class="l-scelto"></i>Le tue date</span>
+      </div>
+    </div>
+    <aside class="cal-riepilogo" aria-live="polite"></aside>
+  </div>
+  <noscript><p>Per vedere le date libere attiva JavaScript oppure scrivici su WhatsApp.</p></noscript>
+</rs-calendario>
+
+<script>
+  import { CAMERE } from '../data/camere';
+  import {
+    carica,
+    iso,
+    daIso,
+    oggi,
+    piuGiorni,
+    notti,
+    occupata,
+    libera,
+    camereLibere,
+    prezzo,
+    dataLunga,
+    euro,
+  } from '../lib/prenotazioni';
+
+  const GIORNI = ['L', 'M', 'M', 'G', 'V', 'S', 'D'];
+
+  class RsCalendario extends HTMLElement {
+    camera = '';
+    tema = '';
+    mesi = 2;
+    mese = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    dal: string | null = null;
+    al: string | null = null;
+    passa: string | null = null;
+
+    connectedCallback() {
+      this.tema = this.dataset.tema || '';
+      this.camera = this.dataset.camera || new URLSearchParams(location.search).get('camera') || '';
+      this.mesi = Number(this.dataset.mesi || 2);
+      carica();
+      this.querySelectorAll<HTMLButtonElement>('.cal-camere button').forEach((b) =>
+        b.addEventListener('click', () => {
+          this.camera = b.dataset.cam || '';
+          this.al = null;
+          if (this.dal && this.camera && occupata(this.camera, this.dal)) this.dal = null;
+          this.disegna();
+        }),
+      );
+      this.querySelectorAll<HTMLButtonElement>('.cal-freccia').forEach((b) =>
+        b.addEventListener('click', () => {
+          const d = new Date(this.mese);
+          d.setMonth(d.getMonth() + Number(b.dataset.dir));
+          const min = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+          const max = new Date(min);
+          max.setMonth(max.getMonth() + 12);
+          if (d < min || d > max) return;
+          this.mese = d;
+          this.disegna();
+        }),
+      );
+      const mesi = this.querySelector('.cal-mesi')!;
+      mesi.addEventListener('click', (e) => {
+        const b = (e.target as HTMLElement).closest<HTMLButtonElement>('button[data-g]');
+        if (b && !b.disabled) this.scegli(b.dataset.g!);
+      });
+      mesi.addEventListener('pointerover', (e) => {
+        const b = (e.target as HTMLElement).closest<HTMLButtonElement>('button[data-g]');
+        if (this.dal && !this.al && b) {
+          this.passa = b.dataset.g!;
+          this.evidenzia();
+        }
+      });
+      window.addEventListener('roscignola:aggiornato', () => this.disegna());
+      window.addEventListener('storage', () => location.reload());
+      window.matchMedia('(min-width: 720px)').addEventListener('change', () => this.disegna());
+      this.disegna();
+    }
+
+    intervalloOk(dal: string, al: string) {
+      if (al <= dal) return false;
+      return this.camera ? libera(this.camera, dal, al) : camereLibere(dal, al).length > 0;
+    }
+
+    scegli(g: string) {
+      if (!this.dal || this.al || g <= this.dal) {
+        if (this.statoNotte(g) === 'pieno') return;
+        this.dal = g;
+        this.al = null;
+      } else if (this.intervalloOk(this.dal, g)) {
+        this.al = g;
+      } else {
+        if (this.statoNotte(g) === 'pieno') return;
+        this.dal = g;
+        this.al = null;
+      }
+      this.disegna();
+    }
+
+    statoNotte(g: string): 'libero' | 'parziale' | 'pieno' {
+      if (this.camera) return occupata(this.camera, g) ? 'pieno' : 'libero';
+      const n = CAMERE.filter((c) => !occupata(c.id, g)).length;
+      return n === 0 ? 'pieno' : n === CAMERE.length ? 'libero' : 'parziale';
+    }
+
+    disegna() {
+      this.querySelectorAll<HTMLButtonElement>('.cal-camere button').forEach((b) =>
+        b.setAttribute('aria-pressed', String((b.dataset.cam || '') === this.camera)),
+      );
+      this.classList.toggle('cal--tutte', !this.camera);
+      const quanti = this.mesi === 2 && window.matchMedia('(min-width: 720px)').matches ? 2 : 1;
+      const t = oggi();
+      let html = '';
+      for (let m = 0; m < quanti; m++) {
+        const primo = new Date(this.mese.getFullYear(), this.mese.getMonth() + m, 1);
+        const nome = primo.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
+        const vuoti = (primo.getDay() + 6) % 7;
+        const ultimo = new Date(primo.getFullYear(), primo.getMonth() + 1, 0).getDate();
+        html += `<div class="cal-mese"><h4>${nome}</h4><div class="cal-griglia">`;
+        html += GIORNI.map((g) => `<span class="cal-gs" aria-hidden="true">${g}</span>`).join('');
+        html += '<span></span>'.repeat(vuoti);
+        for (let d = 1; d <= ultimo; d++) {
+          const g = iso(new Date(primo.getFullYear(), primo.getMonth(), d));
+          const passato = g < t;
+          const stato = passato ? 'passato' : this.statoNotte(g);
+          // un giorno "pieno" resta cliccabile come giorno di partenza
+          const comePartenza = !!this.dal && !this.al && g > this.dal && this.intervalloOk(this.dal, g);
+          const disab = passato || (stato === 'pieno' && !comePartenza);
+          const etichetta = `${daIso(g).toLocaleDateString('it-IT', { weekday: 'long', day: 'numeric', month: 'long' })}: ${
+            stato === 'pieno' ? 'occupato' : stato === 'parziale' ? 'alcune camere libere' : passato ? 'passato' : 'libero'
+          }`;
+          const prezzoG = this.camera && stato === 'libero' ? `<small>${prezzo(this.camera)}€</small>` : '';
+          html += `<button type="button" class="cal-g s-${stato}${g === t ? ' oggi' : ''}" data-g="${g}" ${
+            disab ? 'disabled' : ''
+          } aria-label="${etichetta}"><span>${d}</span>${prezzoG}</button>`;
+        }
+        html += '</div></div>';
+      }
+      this.querySelector('.cal-mesi')!.innerHTML = html;
+      const aiuto = this.querySelector('.cal-aiuto')!;
+      aiuto.textContent = !this.dal ? 'Scegli il giorno di arrivo' : !this.al ? 'Ora scegli il giorno di partenza' : 'Date scelte';
+      this.evidenzia();
+      this.riepilogo();
+    }
+
+    evidenzia() {
+      const fine = this.al || (this.dal && this.passa && this.passa > this.dal && this.intervalloOk(this.dal, this.passa) ? this.passa : null);
+      this.querySelectorAll<HTMLButtonElement>('.cal-g').forEach((b) => {
+        const g = b.dataset.g!;
+        b.classList.toggle('inizio', g === this.dal);
+        b.classList.toggle('fine', !!fine && g === fine);
+        b.classList.toggle('dentro', !!this.dal && !!fine && g > this.dal && g < fine);
+      });
+    }
+
+    riepilogo() {
+      const box = this.querySelector('.cal-riepilogo')!;
+      const nomeCam = this.camera ? CAMERE.find((c) => c.id === this.camera)!.nome : 'Tutte le camere';
+      if (!this.dal || !this.al) {
+        box.innerHTML = `
+          <p class="cal-r-occhiello">${nomeCam}</p>
+          <dl class="cal-r-date">
+            <div><dt>Arrivo</dt><dd>${this.dal ? dataLunga(this.dal) : '—'}</dd></div>
+            <div><dt>Partenza</dt><dd>—</dd></div>
+          </dl>
+          <p class="cal-r-nota">${
+            this.camera
+              ? `Da ${euro(prezzo(this.camera))} a notte. Tocca i giorni sul calendario.`
+              : 'Tocca il giorno di arrivo e quello di partenza: ti mostriamo le camere libere.'
+          }</p>`;
+        return;
+      }
+      const n = notti(this.dal, this.al);
+      const linkPren = (cam: string) =>
+        `/${this.tema}/prenota?camera=${cam}&dal=${this.dal}&al=${this.al}`;
+      if (this.camera) {
+        const tot = prezzo(this.camera) * n;
+        box.innerHTML = `
+          <p class="cal-r-occhiello">${nomeCam}</p>
+          <dl class="cal-r-date">
+            <div><dt>Arrivo</dt><dd>${dataLunga(this.dal)}</dd></div>
+            <div><dt>Partenza</dt><dd>${dataLunga(this.al)}</dd></div>
+          </dl>
+          <p class="cal-r-conto"><span>${n} ${n === 1 ? 'notte' : 'notti'} × ${euro(prezzo(this.camera))}</span><b>${euro(tot)}</b></p>
+          <a class="btn cal-r-btn" href="${linkPren(this.camera)}">Prenota e paga</a>
+          <button type="button" class="cal-r-annulla">Cambia date</button>`;
+      } else {
+        const libere = camereLibere(this.dal, this.al);
+        box.innerHTML = `
+          <p class="cal-r-occhiello">${dataLunga(this.dal)} → ${dataLunga(this.al)} · ${n} ${n === 1 ? 'notte' : 'notti'}</p>
+          <p class="cal-r-nota"><b>${libere.length} ${libere.length === 1 ? 'camera libera' : 'camere libere'}</b> per queste date</p>
+          <ul class="cal-r-lista">${libere
+            .map(
+              (c) => `<li><div><b>${c.nome}</b><small>fino a ${c.ospiti} ospiti · ${euro(prezzo(c.id) * n)}</small></div>
+              <a class="btn" href="${linkPren(c.id)}">Prenota</a></li>`,
+            )
+            .join('')}</ul>
+          <button type="button" class="cal-r-annulla">Cambia date</button>`;
+      }
+      box.querySelector('.cal-r-annulla')?.addEventListener('click', () => {
+        this.dal = this.al = null;
+        this.disegna();
+      });
+    }
+  }
+  if (!customElements.get('rs-calendario')) customElements.define('rs-calendario', RsCalendario);
+</script>
+
+<style is:global>
+  rs-calendario {
+    display: block;
+    --cal-fondo: var(--superficie);
+    --cal-testo: var(--testo);
+    background: var(--cal-fondo);
+    color: var(--cal-testo);
+    border-radius: calc(var(--raggio) + 6px);
+    border: 1px solid var(--linea);
+    box-shadow: var(--ombra);
+    padding: clamp(14px, 2.4vw, 28px);
+  }
+  .cal-camere {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+    margin-bottom: 14px;
+    scrollbar-width: thin;
+  }
+  .cal-camere button {
+    flex: none;
+    font: 500 0.85rem/1 var(--sans);
+    padding: 10px 14px;
+    min-height: 40px;
+    border-radius: 999px;
+    border: 1px solid var(--linea);
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+  }
+  .cal-camere button[aria-pressed='true'] {
+    background: var(--bordeaux);
+    border-color: var(--bordeaux);
+    color: var(--avorio);
+  }
+  .cal-corpo {
+    display: grid;
+    gap: 20px;
+  }
+  @media (min-width: 980px) {
+    .cal-corpo {
+      grid-template-columns: 1fr 290px;
+      align-items: start;
+    }
+  }
+  .cal-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .cal-aiuto {
+    font-size: 0.85rem;
+    color: var(--tenue);
+    text-align: center;
+  }
+  .cal-freccia {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 1px solid var(--linea);
+    background: transparent;
+    color: inherit;
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .cal-mesi {
+    display: grid;
+    gap: 24px;
+  }
+  @media (min-width: 720px) {
+    rs-calendario[data-mesi='2'] .cal-mesi {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .cal-mese h4 {
+    font-family: var(--serif);
+    font-size: 1.25rem;
+    text-transform: capitalize;
+    text-align: center;
+    margin: 4px 0 10px;
+  }
+  .cal-griglia {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 3px;
+  }
+  .cal-gs {
+    text-align: center;
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    color: var(--tenue);
+    padding-bottom: 4px;
+  }
+  .cal-g {
+    position: relative;
+    aspect-ratio: 1;
+    min-height: 38px;
+    border: 0;
+    border-radius: 8px;
+    font: 500 0.9rem/1 var(--sans);
+    color: inherit;
+    cursor: pointer;
+    display: grid;
+    place-content: center;
+    gap: 2px;
+    background: #d9e3cb;
+    color: #2f3a24;
+    transition: background 0.15s, color 0.15s, transform 0.1s;
+  }
+  .cal-g small {
+    font-size: 0.58rem;
+    opacity: 0.7;
+    font-weight: 400;
+  }
+  .cal-g:hover:not(:disabled) {
+    transform: scale(1.06);
+  }
+  .cal-g.s-parziale {
+    background: linear-gradient(135deg, #d9e3cb 50%, #f0dcc9 50%);
+  }
+  .cal-g.s-pieno {
+    background: repeating-linear-gradient(-45deg, #f3ece3 0 4px, #ebe2d7 4px 8px);
+    color: #b3a69d;
+    text-decoration: line-through;
+  }
+  .cal-g.s-pieno:not(:disabled) {
+    text-decoration: none;
+    color: inherit;
+  }
+  .cal-g.s-passato {
+    background: transparent;
+    color: #c9bfb7;
+    cursor: default;
+  }
+  .cal-g.oggi::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    width: 4px;
+    height: 4px;
+    margin-left: -2px;
+    border-radius: 50%;
+    background: var(--bordeaux);
+  }
+  .cal-g.dentro {
+    background: color-mix(in srgb, var(--bordeaux) 22%, white);
+    color: var(--bordeaux-scuro);
+  }
+  .cal-g.inizio,
+  .cal-g.fine {
+    background: var(--bordeaux) !important;
+    color: var(--avorio) !important;
+    text-decoration: none;
+  }
+  .cal-legenda {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 16px;
+    margin-top: 14px;
+    font-size: 0.78rem;
+    color: var(--tenue);
+  }
+  .cal-legenda i {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    margin-right: 6px;
+    vertical-align: -1px;
+  }
+  .l-libero {
+    background: #d9e3cb;
+  }
+  .l-parziale {
+    background: linear-gradient(135deg, #d9e3cb 50%, #f0dcc9 50%);
+  }
+  .l-pieno {
+    background: repeating-linear-gradient(-45deg, #f3ece3 0 3px, #ddd2c5 3px 6px);
+  }
+  .l-scelto {
+    background: var(--bordeaux);
+  }
+  rs-calendario:not(.cal--tutte) .solo-tutte {
+    display: none;
+  }
+  .cal-riepilogo {
+    background: var(--avorio);
+    border-radius: var(--raggio);
+    padding: 18px;
+    border: 1px solid var(--linea);
+    color: var(--testo);
+  }
+  .cal-r-occhiello {
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--bordeaux);
+    font-weight: 500;
+    margin-bottom: 10px;
+  }
+  .cal-r-date {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin: 0 0 12px;
+  }
+  .cal-r-date dt {
+    font-size: 0.72rem;
+    color: var(--tenue);
+  }
+  .cal-r-date dd {
+    margin: 0;
+    font-family: var(--serif);
+    font-size: 1.15rem;
+  }
+  .cal-r-nota {
+    font-size: 0.88rem;
+    color: var(--tenue);
+    margin: 0;
+  }
+  .cal-r-conto {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-top: 1px solid var(--linea);
+    padding-top: 12px;
+    font-size: 0.88rem;
+  }
+  .cal-r-conto b {
+    font-family: var(--serif);
+    font-size: 1.6rem;
+    font-weight: 400;
+  }
+  .cal-r-btn {
+    width: 100%;
+  }
+  .cal-r-annulla {
+    background: none;
+    border: 0;
+    color: var(--tenue);
+    font: inherit;
+    font-size: 0.85rem;
+    text-decoration: underline;
+    cursor: pointer;
+    margin-top: 10px;
+    padding: 6px 0;
+  }
+  .cal-r-lista {
+    list-style: none;
+    padding: 0;
+    margin: 12px 0 0;
+    display: grid;
+    gap: 8px;
+  }
+  .cal-r-lista li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    background: var(--bianco);
+    border: 1px solid var(--linea);
+    border-radius: 10px;
+    padding: 10px 10px 10px 14px;
+  }
+  .cal-r-lista small {
+    display: block;
+    color: var(--tenue);
+    font-size: 0.78rem;
+  }
+  .cal-r-lista .btn {
+    min-height: 38px;
+    padding: 0.5em 1em;
+    font-size: 0.82rem;
+  }
+</style>

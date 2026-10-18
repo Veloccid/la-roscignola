@@ -1,0 +1,230 @@
+// Motore delle prenotazioni – VERSIONE DIMOSTRATIVA.
+// I dati vivono nel browser (localStorage) così il cliente può provare calendario e area proprietario.
+// Nel sito vero queste stesse funzioni parleranno con un database (Supabase) e con Stripe,
+// e i calendari di Airbnb e Booking verranno letti/scritti tramite link iCal.
+import { CAMERE } from '../data/camere';
+
+export type Fonte = 'sito' | 'airbnb' | 'booking' | 'manuale' | 'blocco';
+
+export interface Prenotazione {
+  id: string;
+  camera: string;
+  dal: string; // giorno di arrivo (YYYY-MM-DD)
+  al: string; // giorno di partenza (esclusa dalla notte)
+  ospite: string;
+  fonte: Fonte;
+  ospiti?: number;
+  email?: string;
+  telefono?: string;
+  totale?: number;
+  pagato?: boolean;
+  note?: string;
+  creata: string;
+}
+
+export interface Stato {
+  versione: 1;
+  prenotazioni: Prenotazione[];
+  prezzi: Record<string, number>;
+  sync: Record<string, { airbnb: string; booking: string; ultima?: string }>;
+}
+
+const CHIAVE = 'roscignola-demo-v1';
+
+export const FONTI: Record<Fonte, { nome: string; colore: string }> = {
+  sito: { nome: 'Sito', colore: '#7A1F2B' },
+  airbnb: { nome: 'Airbnb', colore: '#E0565B' },
+  booking: { nome: 'Booking', colore: '#2B5C9E' },
+  manuale: { nome: 'Manuale', colore: '#7D8A6A' },
+  blocco: { nome: 'Chiusa', colore: '#8a7f78' },
+};
+
+// ---------- date ----------
+export function iso(d: Date) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const g = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${g}`;
+}
+export function daIso(s: string) {
+  const [y, m, g] = s.split('-').map(Number);
+  return new Date(y, m - 1, g);
+}
+export function oggi() {
+  return iso(new Date());
+}
+export function piuGiorni(s: string, n: number) {
+  const d = daIso(s);
+  d.setDate(d.getDate() + n);
+  return iso(d);
+}
+export function notti(dal: string, al: string) {
+  return Math.round((daIso(al).getTime() - daIso(dal).getTime()) / 86400000);
+}
+export function dataLunga(s: string) {
+  return daIso(s).toLocaleDateString('it-IT', { weekday: 'short', day: 'numeric', month: 'short' });
+}
+export function euro(n: number) {
+  return n.toLocaleString('it-IT', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 });
+}
+
+// ---------- dati di esempio ----------
+function seme(): Stato {
+  const t = oggi();
+  const p = (camera: string, da: number, n: number, ospite: string, fonte: Fonte, extra: Partial<Prenotazione> = {}): Prenotazione => {
+    const dal = piuGiorni(t, da);
+    const al = piuGiorni(dal, n);
+    const cam = CAMERE.find((c) => c.id === camera)!;
+    return {
+      id: Math.random().toString(36).slice(2, 10),
+      camera,
+      dal,
+      al,
+      ospite,
+      fonte,
+      ospiti: Math.min(2, cam.ospiti),
+      totale: fonte === 'blocco' ? 0 : cam.prezzo * n,
+      pagato: fonte !== 'blocco',
+      creata: piuGiorni(t, -7),
+      ...extra,
+    };
+  };
+  return {
+    versione: 1,
+    prenotazioni: [
+      p('usignolo', -1, 3, 'Giulia e Marco R.', 'airbnb'),
+      p('usignolo', 4, 2, 'Elena F.', 'sito', { email: 'elena@example.com' }),
+      p('usignolo', 9, 5, 'Thomas B.', 'booking'),
+      p('usignolo', 20, 3, 'Sara L.', 'sito'),
+      p('glicine', 0, 2, 'Famiglia Conti', 'booking', { ospiti: 3 }),
+      p('glicine', 5, 4, 'Anna e Luca', 'airbnb'),
+      p('glicine', 14, 2, 'Manutenzione', 'blocco', { note: 'Imbiancatura' }),
+      p('uliveto', 2, 3, 'Paolo M.', 'manuale', { note: 'Prenotato al telefono' }),
+      p('uliveto', 7, 2, 'Claire D.', 'booking'),
+      p('uliveto', 11, 6, 'Roberto e Ida', 'sito'),
+      p('pergola', 1, 4, 'Famiglia Bianchi', 'sito', { ospiti: 4 }),
+      p('pergola', 8, 7, 'Famiglia Weber', 'booking', { ospiti: 4 }),
+      p('pergola', 24, 3, 'Martina G.', 'airbnb'),
+    ],
+    prezzi: Object.fromEntries(CAMERE.map((c) => [c.id, c.prezzo])),
+    sync: Object.fromEntries(
+      CAMERE.map((c) => [
+        c.id,
+        {
+          airbnb: `https://www.airbnb.it/calendar/ical/0000000.ics?s=esempio-${c.id}`,
+          booking: `https://admin.booking.com/hotel/hoteladmin/ical.html?t=esempio-${c.id}`,
+          ultima: new Date(Date.now() - 1000 * 60 * 14).toISOString(),
+        },
+      ]),
+    ),
+  };
+}
+
+// ---------- archivio ----------
+let cache: Stato | null = null;
+
+export function carica(): Stato {
+  if (cache) return cache;
+  try {
+    const raw = localStorage.getItem(CHIAVE);
+    if (raw) {
+      const s = JSON.parse(raw) as Stato;
+      if (s && s.versione === 1) return (cache = s);
+    }
+  } catch {}
+  cache = seme();
+  salva(cache);
+  return cache;
+}
+
+export function salva(s: Stato) {
+  cache = s;
+  try {
+    localStorage.setItem(CHIAVE, JSON.stringify(s));
+  } catch {}
+  try {
+    window.dispatchEvent(new CustomEvent('roscignola:aggiornato'));
+  } catch {}
+}
+
+export function ripristina() {
+  try {
+    localStorage.removeItem(CHIAVE);
+  } catch {}
+  cache = null;
+  return carica();
+}
+
+export function prezzo(camera: string) {
+  const s = carica();
+  return s.prezzi[camera] ?? CAMERE.find((c) => c.id === camera)?.prezzo ?? 0;
+}
+
+export function prenotazioniCamera(camera: string) {
+  return carica().prenotazioni.filter((p) => p.camera === camera);
+}
+
+/** La notte che inizia in `giorno` è occupata? */
+export function occupata(camera: string, giorno: string) {
+  return prenotazioniCamera(camera).some((p) => p.dal <= giorno && giorno < p.al);
+}
+
+/** Tutte le notti tra dal (incluso) e al (escluso) sono libere? */
+export function libera(camera: string, dal: string, al: string) {
+  return !prenotazioniCamera(camera).some((p) => p.dal < al && dal < p.al);
+}
+
+export function camereLibere(dal: string, al: string) {
+  return CAMERE.filter((c) => libera(c.id, dal, al));
+}
+
+export function aggiungi(dati: Omit<Prenotazione, 'id' | 'creata'>) {
+  const s = carica();
+  if (!libera(dati.camera, dati.dal, dati.al)) throw new Error('Le date si sovrappongono a un’altra prenotazione.');
+  const nuova: Prenotazione = { ...dati, id: Math.random().toString(36).slice(2, 10), creata: oggi() };
+  s.prenotazioni.push(nuova);
+  salva(s);
+  return nuova;
+}
+
+export function rimuovi(id: string) {
+  const s = carica();
+  s.prenotazioni = s.prenotazioni.filter((p) => p.id !== id);
+  salva(s);
+}
+
+export function impostaPrezzo(camera: string, valore: number) {
+  const s = carica();
+  s.prezzi[camera] = valore;
+  salva(s);
+}
+
+export function sincronizzaDemo(camera?: string) {
+  const s = carica();
+  const ora = new Date().toISOString();
+  for (const id of Object.keys(s.sync)) if (!camera || camera === id) s.sync[id].ultima = ora;
+  salva(s);
+}
+
+/** File iCal della camera, da incollare in Airbnb e Booking ("Importa calendario"). */
+export function ics(camera: string) {
+  const cam = CAMERE.find((c) => c.id === camera);
+  const righe = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//La Roscignola//Prenotazioni//IT',
+    `X-WR-CALNAME:La Roscignola – ${cam?.nome ?? camera}`,
+  ];
+  for (const p of prenotazioniCamera(camera)) {
+    righe.push(
+      'BEGIN:VEVENT',
+      `UID:${p.id}@laroscignola`,
+      `DTSTART;VALUE=DATE:${p.dal.replaceAll('-', '')}`,
+      `DTEND;VALUE=DATE:${p.al.replaceAll('-', '')}`,
+      `SUMMARY:${p.fonte === 'blocco' ? 'Non disponibile' : 'Prenotato'}`,
+      'END:VEVENT',
+    );
+  }
+  righe.push('END:VCALENDAR');
+  return righe.join('\r\n');
+}

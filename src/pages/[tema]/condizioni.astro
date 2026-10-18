@@ -1,0 +1,27 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { SITO } from '../../config';
+import { percorsiTemi, type Tema } from '../../temi';
+export function getStaticPaths() {
+  return percorsiTemi();
+}
+const { tema } = Astro.props as { tema: Tema };
+---
+
+<Layout tema={tema} titolo="Condizioni di prenotazione">
+  <section class="sezione contenitore testo-legale">
+    <span class="provvisorio">Da completare con un professionista</span>
+    <h1>Condizioni di prenotazione</h1>
+    <p>Qui andranno le condizioni di prenotazione: pagamento anticipato online, politica di cancellazione e rimborso, orari di check‑in e check‑out, tassa di soggiorno, animali, regole della casa.</p>
+    <p class="tenue">{SITO.nome} · {SITO.piva} · {SITO.cin}</p>
+  </section>
+</Layout>
+
+<style>
+  .testo-legale {
+    max-width: 760px;
+  }
+  .testo-legale h1 {
+    margin-top: 16px;
+  }
+</style>

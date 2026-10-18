@@ -1,0 +1,80 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Foto from '../../components/Foto.astro';
+import { SITO, linkWhatsApp } from '../../config';
+import { PUNTI_INTERESSE } from '../../data/camere';
+import { percorsiTemi, link, type Tema } from '../../temi';
+export function getStaticPaths() {
+  return percorsiTemi();
+}
+const { tema } = Astro.props as { tema: Tema };
+---
+
+<Layout tema={tema} titolo="Contatti e come arrivare" pagina="contatti">
+  <section class="sezione contenitore griglia-contatti">
+    <div>
+      <span class="occhiello">Contatti</span>
+      <h1>Come arrivare alla Roscignola</h1>
+      <p class="tenue">{SITO.indirizzo} · {SITO.zona}</p>
+      <ul class="canali">
+        <li><span>WhatsApp</span><a href={linkWhatsApp('Ciao! Vorrei informazioni sul B&B La Roscignola.')}>{SITO.telefono}</a></li>
+        <li><span>Email</span><a href={`mailto:${SITO.email}`}>{SITO.email}</a></li>
+        <li><span>Check‑in</span>{SITO.checkin}</li>
+        <li><span>Check‑out</span>{SITO.checkout}</li>
+      </ul>
+      <h3>Nei dintorni <span class="provvisorio">Da completare</span></h3>
+      <ul class="dintorni">{PUNTI_INTERESSE.map((p) => <li><span>{p.nome}</span><span class="tenue">{p.distanza}</span></li>)}</ul>
+      <div class="azioni">
+        <a class="btn" href={link(tema.id, 'disponibilita')}>Vedi le date libere</a>
+        <a class="btn btn--vuoto" href={linkWhatsApp('Ciao! Vorrei informazioni sul B&B La Roscignola.')}>Scrivici</a>
+      </div>
+    </div>
+    <div class="mappa">
+      <Foto soggetto="Mappa: verrà inserita con l’indirizzo esatto" tipo="esterno" tinta={['#7D8A6A', '#E4D4BD']} rapporto="4 / 5" />
+    </div>
+  </section>
+</Layout>
+
+<style>
+  .griglia-contatti {
+    display: grid;
+    gap: 40px;
+  }
+  @media (min-width: 900px) {
+    .griglia-contatti {
+      grid-template-columns: 1.1fr 1fr;
+      align-items: start;
+    }
+  }
+  .canali,
+  .dintorni {
+    list-style: none;
+    padding: 0;
+    margin: 24px 0 32px;
+    border-top: 1px solid var(--linea);
+  }
+  .canali li,
+  .dintorni li {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--linea);
+  }
+  .canali span {
+    color: var(--tenue);
+    font-size: 0.85rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .canali a {
+    color: var(--bordeaux);
+    word-break: break-word;
+    text-align: right;
+  }
+  .azioni {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+</style>

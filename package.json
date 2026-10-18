@@ -1,0 +1,16 @@
+{
+  "name": "roscignola-proposte",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "astro": "^5.14.0",
+    "@fontsource/bodoni-moda": "^5.2.0",
+    "@fontsource/jost": "^5.2.0"
+  }
+}
