@@ -7,11 +7,11 @@ import { CAMERE } from '../../data/camere';
 import { link } from '../../temi';
 const { tema } = Astro.props;
 const momenti = [
-  { ora: '6:30', titolo: 'Il canto', testo: 'Prima della sveglia, dalla finestra: l’usignolo che dà il nome alla casa.', tipo: 'giardino' },
-  { ora: '8:30', titolo: 'La colazione', testo: 'Torte del giorno, marmellate di casa e caffè. Sotto il pergolato, se c’è il sole.', tipo: 'colazione' },
-  { ora: '11:00', titolo: 'In giro', testo: 'Ti diamo i nostri posti preferiti: borghi, sentieri, la trattoria giusta. Da completare con i dintorni veri.', tipo: 'esterno' },
-  { ora: '18:30', titolo: 'In giardino', testo: 'Un bicchiere sulle sdraio mentre il cielo diventa arancione dietro gli ulivi.', tipo: 'giardino' },
-  { ora: '22:30', titolo: 'Buonanotte', testo: 'Silenzio vero, lenzuola fresche, buio di campagna. Domattina si ricomincia.', tipo: 'camera' },
+  { ora: '6:30', titolo: 'Il canto', testo: 'Prima della sveglia, dalla finestra: l’usignolo che dà il nome alla casa e il borgo sulla collina.', foto: 'vistaBorgo' },
+  { ora: '8:30', titolo: 'La colazione', testo: 'Caffè e qualcosa di buono in cucina, o fuori sotto il gazebo se c’è il sole.', foto: 'cucinaCamino' },
+  { ora: '11:00', titolo: 'In piscina', testo: 'Un lettino, l’ombrellone e la vista sulle colline. Non serve andare da nessuna parte.', foto: 'piscinaColline' },
+  { ora: '19:30', titolo: 'In giardino', testo: 'Il barbecue acceso, la tavola sotto il gazebo e il cielo che diventa arancione dietro gli ulivi.', foto: 'giardino' },
+  { ora: '22:30', titolo: 'Buonanotte', testo: 'Silenzio vero, lenzuola fresche, buio di campagna. Domattina si ricomincia.', foto: 'cameraMatrimoniale' },
 ] as const;
 ---
 
@@ -39,7 +39,7 @@ const momenti = [
       momenti.map((m) => (
         <li class="momento" data-ora={m.ora}>
           <div class="momento-card">
-            <Foto soggetto={m.titolo} tipo={m.tipo} tinta={['#7A1F2B', '#B48F5A']} rapporto="16 / 10" />
+            <Foto foto={m.foto} soggetto="" rapporto="16 / 10" />
             <div class="momento-testo">
               <span class="momento-ora">{m.ora}</span>
               <h2>{m.titolo}</h2>

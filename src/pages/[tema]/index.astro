@@ -29,7 +29,7 @@ const HOME: Record<string, any> = {
   foto: Foto,
 };
 const Home = HOME[tema.id];
-const trasparente = ['bordeaux', 'canto', 'foto'].includes(tema.id);
+const trasparente = ['bordeaux', 'foto'].includes(tema.id);
 ---
 
 <Layout tema={tema} trasparente={trasparente}>

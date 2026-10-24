@@ -8,7 +8,7 @@ const { tema } = Astro.props;
 ---
 
 <section class="quadro primo">
-  <Foto soggetto="Esterno al tramonto (foto a tutto schermo)" tipo="esterno" tinta={['#3e0e16', '#B48F5A']} rapporto="16 / 9" />
+  <Foto foto="piscinaColline" soggetto="" rapporto="16 / 9" />
   <div class="velo"></div>
   <div class="contenitore didascalia">
     <span class="occhiello">La Roscignola · Bed & Breakfast</span>
@@ -22,7 +22,7 @@ const { tema } = Astro.props;
   {
     CAMERE.map((c, i) => (
       <section class:list={['quadro', { destra: i % 2 }]}>
-        <Foto soggetto={`${c.nome} (foto a tutto schermo)`} tipo="camera" tinta={[c.tinta[0], '#2a1c19']} rapporto="16 / 9" />
+        <Foto soggetto={`${c.nome} (foto a tutto schermo)`} tipo="camera" tinta={[c.tinta[0], '#2a1c19']} src={c.foto} rapporto="16 / 9" />
         <div class="velo"></div>
         <div class="contenitore didascalia piccola rivela">
           <span class="occhiello">0{i + 1} — {c.ospiti} ospiti</span>
@@ -36,11 +36,11 @@ const { tema } = Astro.props;
 </div>
 
 <section class="mosaico contenitore sezione">
-  <Foto soggetto="Colazione" tipo="colazione" tinta={['#B48F5A', '#E4D4BD']} rapporto="1 / 1" class="m1" />
-  <Foto soggetto="Giardino" tipo="giardino" tinta={['#7D8A6A', '#E4D4BD']} rapporto="1 / 1" class="m2" />
-  <Foto soggetto="Dettaglio" tipo="dettaglio" tinta={['#7A1F2B', '#E4D4BD']} rapporto="1 / 1" class="m3" />
-  <Foto soggetto="Pergolato" tipo="giardino" tinta={['#5A1520', '#B48F5A']} rapporto="1 / 1" class="m4" />
-  <Foto soggetto="Ingresso" tipo="esterno" tinta={['#B48F5A', '#7A1F2B']} rapporto="1 / 1" class="m5" />
+  <Foto foto="piscinaGiardino" soggetto="" rapporto="1 / 1" class="m1" />
+  <Foto foto="giardino" soggetto="" rapporto="1 / 1" class="m2" />
+  <Foto foto="cucinaCamino" soggetto="" rapporto="1 / 1" class="m3" />
+  <Foto foto="vistaBorgo" soggetto="" rapporto="1 / 1" class="m4" />
+  <Foto foto="bagno" soggetto="" rapporto="1 / 1" class="m5" />
 </section>
 
 <section class="sezione contenitore">

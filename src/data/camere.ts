@@ -10,6 +10,7 @@ export interface Camera {
   prezzo: number; // prezzo base a notte (modificabile dall'area proprietario)
   servizi: string[];
   tinta: [string, string]; // colori del segnaposto foto
+  foto?: string; // foto vera della camera
   piano: string;
 }
 
@@ -25,7 +26,8 @@ export const CAMERE: Camera[] = [
     mq: 18,
     prezzo: 95,
     servizi: ['Balcone', 'Bagno privato', 'Aria condizionata', 'Wi‑Fi'],
-    tinta: ['#7A1F2B', '#B48F5A'],
+    tinta: ['#6B1C18', '#B48F5A'],
+    foto: '/foto/camera-matrimoniale.jpg',
     piano: 'Primo piano',
   },
   {
@@ -40,6 +42,7 @@ export const CAMERE: Camera[] = [
     prezzo: 110,
     servizi: ['Bagno con doccia grande', 'Aria condizionata', 'Scrivania', 'Wi‑Fi'],
     tinta: ['#8C6A9A', '#E4D4BD'],
+    foto: '/foto/camera-armadio.jpg',
     piano: 'Primo piano',
   },
   {
@@ -67,14 +70,15 @@ export const CAMERE: Camera[] = [
     mq: 34,
     prezzo: 145,
     servizi: ['Pergola privata', 'Angolo cottura', 'Due ambienti', 'Wi‑Fi'],
-    tinta: ['#B48F5A', '#5A1520'],
+    tinta: ['#B48F5A', '#4d130f'],
     piano: 'Piano terra',
   },
 ];
 
 export const SERVIZI_CASA = [
-  { titolo: 'Colazione fatta in casa', testo: 'Torte, marmellate e pane del forno del paese, serviti in sala o sotto il pergolato.' },
-  { titolo: 'Giardino e ulivi', testo: 'Un prato con sdraio, ombra e silenzio. Si sente solo il canto degli uccelli.' },
+  { titolo: 'Piscina tra gli ulivi', testo: 'Lettini, ombrelloni e la vista sulle colline. Il posto dove passerai i pomeriggi.' },
+  { titolo: 'Giardino con gazebo', testo: 'Prato, ulivi, gazebo e barbecue per cenare all’aperto nelle sere d’estate.' },
+  { titolo: 'Cucina a disposizione', testo: 'Una cucina di casa con camino e tavolo grande, per una colazione o una cena tra voi.' },
   { titolo: 'Parcheggio gratuito', testo: 'Posto auto interno, senza cercare parcheggio.' },
   { titolo: 'Wi‑Fi in tutta la casa', testo: 'Veloce anche in giardino, per chi deve lavorare qualche ora.' },
 ];

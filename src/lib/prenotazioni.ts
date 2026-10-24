@@ -32,7 +32,7 @@ export interface Stato {
 const CHIAVE = 'roscignola-demo-v1';
 
 export const FONTI: Record<Fonte, { nome: string; colore: string }> = {
-  sito: { nome: 'Sito', colore: '#7A1F2B' },
+  sito: { nome: 'Sito', colore: '#6b1c18' },
   airbnb: { nome: 'Airbnb', colore: '#E0565B' },
   booking: { nome: 'Booking', colore: '#2B5C9E' },
   manuale: { nome: 'Manuale', colore: '#7D8A6A' },

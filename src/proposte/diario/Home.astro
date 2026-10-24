@@ -15,8 +15,8 @@ const romani = ['I', 'II', 'III', 'IV'];
 </section>
 
 <section class="contenitore apertura">
-  <Foto soggetto="La casa vista dal giardino" tipo="esterno" rapporto="16 / 9" />
-  <p class="didascalia">La Roscignola al mattino, prima che il sole arrivi sul glicine.</p>
+  <Foto foto="vistaBorgo" soggetto="" rapporto="16 / 9" />
+  <p class="didascalia">Dal giardino della Roscignola: il borgo sulla collina e le file di ulivi.</p>
 </section>
 
 <section class="contenitore colonne">
@@ -47,7 +47,7 @@ const romani = ['I', 'II', 'III', 'IV'];
             <a href={`${link(tema, 'disponibilita')}?camera=${c.id}`}>Date libere e prezzi →</a>
           </div>
           <div class="lato">
-            <Foto soggetto={c.nome} tipo="camera" tinta={c.tinta} rapporto="1 / 1" etichetta={false} />
+            <Foto soggetto={c.nome} tipo="camera" tinta={c.tinta} src={c.foto} rapporto="1 / 1" etichetta={false} />
             <span>da {c.prezzo}€ la notte · {c.ospiti} ospiti</span>
           </div>
         </li>

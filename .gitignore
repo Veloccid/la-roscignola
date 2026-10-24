@@ -4,3 +4,7 @@ dist/
 .vercel/
 .env
 .DS_Store
+
+# foto originali del cliente (le copie usate dal sito sono in public/foto)
+Foto La Roscignola/
+*.zip

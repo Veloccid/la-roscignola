@@ -52,7 +52,7 @@ const { tema } = Astro.props;
   {
     CAMERE.map((c, i) => (
       <article class="stanza rivela">
-        <Foto soggetto={c.nome} tipo="camera" tinta={c.tinta} rapporto="4 / 3" />
+        <Foto soggetto={c.nome} tipo="camera" tinta={c.tinta} src={c.foto} rapporto="4 / 3" />
         <div>
           <span class="tag">Chiave n. {i + 1}</span>
           <h3>{c.nome}</h3>
@@ -100,7 +100,7 @@ const { tema } = Astro.props;
     gap: 36px 12px;
     padding: 40px 12px 28px;
     border-radius: 18px;
-    background: linear-gradient(180deg, #6a1924, var(--bordeaux-scuro));
+    background: linear-gradient(180deg, #5c1814, var(--bordeaux-scuro));
     box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.08), 0 30px 60px -30px rgba(42, 28, 25, 0.6);
     max-width: 920px;
     margin-inline: auto;

@@ -10,22 +10,22 @@ const { tema } = Astro.props;
 
 <section class="ap">
   <div class="contenitore ap-in">
-    <Logo class="ap-logo" />
-    <p class="ap-frase">Bed & Breakfast · quattro camere · colazione fatta in casa</p>
+    <Logo class="ap-logo" targa />
+    <p class="ap-frase">Bed & Breakfast · piscina · giardino tra gli ulivi</p>
     <div class="ap-azioni">
       <a class="btn btn--chiaro" href={link(tema, 'disponibilita')}>Prenota le tue date</a>
       <a class="ap-link" href="#camere">Scopri le camere ↓</a>
     </div>
   </div>
   <div class="ap-foto contenitore">
-    <Foto soggetto="Esterno della casa" tipo="esterno" tinta={['#5A1520', '#B48F5A']} rapporto="21 / 9" />
+    <Foto foto="piscinaGazebo" soggetto="" rapporto="21 / 9" />
   </div>
 </section>
 
 <section class="numeri">
   <div class="contenitore numeri-in">
     <div><b>4</b><span>camere con bagno privato</span></div>
-    <div><b>7:30</b><span>colazione fino alle 10</span></div>
+    <div><b>1</b><span>piscina tra gli ulivi</span></div>
     <div><b>0 €</b><span>di commissioni prenotando qui</span></div>
   </div>
 </section>
@@ -45,7 +45,7 @@ const { tema } = Astro.props;
               <a class="btn" href={`${link(tema, 'disponibilita')}?camera=${c.id}`}>Date libere</a>
             </div>
           </div>
-          <Foto soggetto={c.nome} tipo="camera" tinta={c.tinta} rapporto="4 / 5" class="cam-foto rivela" />
+          <Foto soggetto={c.nome} tipo="camera" tinta={c.tinta} src={c.foto} rapporto="4 / 5" class="cam-foto rivela" />
         </div>
       </article>
     ))
@@ -76,8 +76,9 @@ const { tema } = Astro.props;
     padding-bottom: 48px;
   }
   .ap :global(.ap-logo) {
-    width: min(760px, 92%);
-    --logo-occhio: var(--bordeaux);
+    width: min(640px, 92%);
+    padding: clamp(16px, 3vw, 32px) clamp(20px, 4vw, 48px);
+    border-radius: 18px;
     animation: entra 1.2s ease both;
   }
   .ap-frase {

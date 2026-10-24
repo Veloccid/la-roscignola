@@ -30,7 +30,7 @@ const anno = new Date().getFullYear();
     <meta name="robots" content="noindex, nofollow" />
     <title>{titoloPagina}</title>
     <meta name="description" content={descrizione} />
-    <meta name="theme-color" content="#7a1f2b" />
+    <meta name="theme-color" content="#6b1c18" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content={titoloPagina} />
@@ -66,7 +66,7 @@ const anno = new Date().getFullYear();
     <footer class="piede">
       <div class="contenitore piede-griglia">
         <div>
-          <Logo class="piede-logo" />
+          <Logo class="piede-logo" targa />
           <p class="tenue-chiaro">{SITO.tipo} · {SITO.zona}</p>
         </div>
         <div>
@@ -155,11 +155,12 @@ const anno = new Date().getFullYear();
     border-color: var(--linea);
     color: var(--bordeaux);
   }
-  .testata--trasparente :global(.logo-occhio) {
-    fill: var(--bordeaux);
+  .testata :global(.logo) {
+    transition: background 0.3s ease, padding 0.3s ease;
   }
-  .testata--trasparente.scorsa :global(.logo-occhio) {
-    fill: var(--avorio);
+  .testata--trasparente:not(.scorsa) :global(.logo) {
+    background: var(--avorio);
+    padding: 6px 10px;
   }
   .testata--trasparente .menu-desk .btn {
     background: var(--avorio);
@@ -180,7 +181,7 @@ const anno = new Date().getFullYear();
   }
   .testata-logo {
     display: block;
-    width: clamp(150px, 18vw, 200px);
+    width: clamp(160px, 19vw, 210px);
     color: inherit;
   }
   .menu-desk {
@@ -269,9 +270,6 @@ const anno = new Date().getFullYear();
     padding: 64px 0 96px;
     margin-top: 0;
   }
-  .piede :global(.logo-occhio) {
-    fill: var(--bordeaux-scuro);
-  }
   .piede-griglia {
     display: grid;
     gap: 32px;
@@ -283,7 +281,7 @@ const anno = new Date().getFullYear();
     }
   }
   .piede :global(.piede-logo) {
-    width: 200px;
+    width: 230px;
     margin-bottom: 12px;
   }
   .piede h4 {

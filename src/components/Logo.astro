@@ -1,47 +1,67 @@
 ---
-// LOGO PROVVISORIO ricostruito da una foto del logo (manca il file originale).
-// La "R" è una P di Bodoni con la testa dell'usignolo sulla pancia e le piume al posto della gamba.
-// Appena arriva il file originale si sostituisce questo componente con <img src="/logo.svg">.
+// Logo ORIGINALE del cliente (public/logo/la-roscignola-logo.jpg, file non modificato).
+// Il file è un JPG 728×275 con sfondo bianco: qui viene solo ritagliato via CSS
+// e fuso con lo sfondo (mix-blend-mode: multiply) così il bianco non si vede sugli sfondi chiari.
+// Sugli sfondi scuri usare `targa` per metterlo su una targhetta color avorio.
+// Quando arriva un PNG trasparente o un SVG basta cambiare FILE e togliere il multiply.
 interface Props {
   variante?: 'completo' | 'marchio';
+  targa?: boolean;
   class?: string;
   titolo?: string;
 }
-const { variante = 'completo', class: classe = '', titolo = 'La Roscignola' } = Astro.props;
-const viewBox = variante === 'marchio' ? '0 18 240 167' : '0 18 640 167';
+const { variante = 'completo', targa = false, class: classe = '', titolo = 'La Roscignola' } = Astro.props;
+
+const FILE = '/logo/la-roscignola-logo.jpg';
+const W = 728;
+const H = 275;
+// zone di ritaglio nel file originale (pixel)
+const RITAGLI = {
+  completo: { x: 44, y: 64, w: 608, h: 160 }, // scritta ROSCIGNOLA con piuma e grappolo
+  marchio: { x: 44, y: 64, w: 126, h: 140 }, // solo la R con la piuma
+};
+const r = RITAGLI[variante];
+const stile = [
+  `--rapporto:${r.w} / ${r.h}`,
+  `--larghezza:${((W / r.w) * 100).toFixed(3)}%`,
+  `--sx:${((-r.x / r.w) * 100).toFixed(3)}%`,
+  `--su:${((-r.y / r.h) * 100).toFixed(3)}%`,
+].join(';');
 ---
 
-<svg
-  class:list={['logo', `logo--${variante}`, classe]}
-  viewBox={viewBox}
-  xmlns="http://www.w3.org/2000/svg"
-  role="img"
-  aria-label={titolo}
-  fill="currentColor"
->
-  <text x="8" y="120" class="logo-font" font-size="130">P</text>
-  <path d="M68 38 C 74 26, 93 23, 101 33 C 105 38, 106 45, 103 51 L 111 82 L 98 54 C 90 51, 80 49, 73 47 Z"></path>
-  <circle class="logo-occhio" cx="93" cy="36" r="2.6"></circle>
-  <g class="logo-piume">
-    <path pathLength="1" d="M42 84 C 62 98, 76 118, 84 146 C 88 160, 94 172, 104 180 C 88 174, 80 160, 76 146 C 70 122, 58 104, 42 90 Z"></path>
-    <path pathLength="1" d="M46 82 C 72 94, 94 112, 112 134 C 124 150, 138 164, 160 172 C 136 170, 120 156, 106 140 C 90 118, 70 100, 46 87 Z"></path>
-    <path pathLength="1" d="M50 80 C 80 88, 104 106, 126 126 C 150 148, 180 158, 228 156 C 196 166, 162 160, 136 140 C 110 118, 84 96, 50 85 Z"></path>
-    <path pathLength="1" d="M54 79 C 70 78, 84 80, 98 86 C 84 84, 70 83, 56 83 Z"></path>
-  </g>
-  {variante === 'completo' && <text x="124" y="120" class="logo-font" font-size="112" letter-spacing="3">oscignola</text>}
-</svg>
+<span class:list={['logo', `logo--${variante}`, { 'logo--targa': targa }, classe]} style={stile} role="img" aria-label={titolo}>
+  <span class="logo-finestra">
+    <img src={FILE} alt="" width={W} height={H} decoding="async" />
+  </span>
+</span>
 
 <style>
   .logo {
     display: block;
+    border-radius: 10px;
+  }
+  .logo-finestra {
+    display: block;
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: var(--rapporto);
+  }
+  .logo img {
+    position: absolute;
+    left: var(--sx);
+    top: var(--su);
+    width: var(--larghezza);
+    max-width: none;
     height: auto;
-    overflow: visible;
+    mix-blend-mode: multiply;
+    /* schiarisce la texture grigia dell'angolo del file fino al bianco, senza modificare il file */
+    filter: brightness(1.07) contrast(1.08);
+    user-select: none;
+    -webkit-user-drag: none;
   }
-  .logo-font {
-    font-family: 'Bodoni Moda', 'Bodoni 72', Didot, Georgia, serif;
-    font-weight: 400;
-  }
-  .logo-occhio {
-    fill: var(--logo-occhio, var(--avorio));
+  .logo--targa {
+    background: #fff;
+    padding: 0.5em 0.8em;
+    box-shadow: 0 6px 20px -10px rgba(0, 0, 0, 0.45);
   }
 </style>

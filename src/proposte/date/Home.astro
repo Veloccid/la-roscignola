@@ -31,7 +31,7 @@ const { tema } = Astro.props;
     {
       CAMERE.map((c) => (
         <a class="mini rivela" href={`${link(tema, 'disponibilita')}?camera=${c.id}`}>
-          <Foto soggetto={c.nome} tipo="camera" tinta={c.tinta} rapporto="1 / 1" etichetta={false} />
+          <Foto soggetto={c.nome} tipo="camera" tinta={c.tinta} src={c.foto} rapporto="1 / 1" etichetta={false} />
           <div>
             <b>{c.nome}</b>
             <span>{c.ospiti} ospiti · da {c.prezzo}€</span>
@@ -87,7 +87,7 @@ const { tema } = Astro.props;
     margin-right: 8px;
   }
   .apertura :global(.cal-grande) {
-    box-shadow: 0 30px 60px -30px rgba(90, 21, 32, 0.45);
+    box-shadow: 0 30px 60px -30px rgba(77, 19, 15, 0.45);
   }
   .striscia {
     display: grid;

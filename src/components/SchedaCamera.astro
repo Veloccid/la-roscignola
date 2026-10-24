@@ -11,7 +11,7 @@ const { camera: c, tema, class: classe = '' } = Astro.props;
 ---
 
 <article class:list={['scheda', classe]} id={c.id}>
-  <Foto soggetto={c.nome} tipo="camera" tinta={c.tinta} rapporto="4 / 3" />
+  <Foto soggetto={c.nome} tipo="camera" tinta={c.tinta} src={c.foto} rapporto="4 / 3" />
   <div class="scheda-testo">
     <p class="scheda-meta">{c.piano} · {c.mq} m² · fino a {c.ospiti} ospiti</p>
     <h3>{c.nome}</h3>

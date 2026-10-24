@@ -22,7 +22,7 @@ const { tema } = Astro.props as { tema: Tema };
     {
       CAMERE.map((c, i) => (
         <article class:list={['camera-riga rivela', { inversa: i % 2 }]} id={c.id}>
-          <Foto soggetto={c.nome} tipo="camera" tinta={c.tinta} rapporto="5 / 4" />
+          <Foto soggetto={c.nome} tipo="camera" tinta={c.tinta} src={c.foto} rapporto="5 / 4" />
           <div>
             <p class="meta">{c.piano} · {c.mq} m² · fino a {c.ospiti} ospiti · {c.letti}</p>
             <h2>{c.nome}</h2>

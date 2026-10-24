@@ -12,13 +12,13 @@ const { tema } = Astro.props;
   <div class="apertura-testo">
     <span class="occhiello">Bed & Breakfast</span>
     <h1>Dormire dove canta <span class="corsivo">l’usignolo</span></h1>
-    <p class="tenue">Quattro camere, una colazione fatta in casa e un giardino silenzioso. Scegli le date libere e prenota in due minuti. <span class="provvisorio">Testo provvisorio</span></p>
+    <p class="tenue">Una piscina tra gli ulivi, un giardino silenzioso e camere tranquille con vista sulle colline. Scegli le date libere e prenota in due minuti. <span class="provvisorio">Testo provvisorio</span></p>
     <div class="azioni">
       <a class="btn" href={link(tema, 'disponibilita')}>Vedi le date libere</a>
       <a class="btn btn--vuoto" href={link(tema, 'camere')}>Le camere</a>
     </div>
   </div>
-  <Foto soggetto="Esterno della casa" tipo="esterno" rapporto="5 / 4" class="apertura-foto" />
+  <Foto foto="piscinaColline" soggetto="" rapporto="5 / 4" class="apertura-foto" />
 </section>
 
 <section class="sezione contenitore">
@@ -38,7 +38,7 @@ const { tema } = Astro.props;
 </section>
 
 <section class="sezione contenitore servizi">
-  <Foto soggetto="La colazione" tipo="colazione" tinta={['#B48F5A', '#E4D4BD']} rapporto="1 / 1" />
+  <Foto foto="giardino" soggetto="" rapporto="1 / 1" />
   <div>
     <h2>Piccole cose che fanno la differenza</h2>
     <dl>

@@ -32,7 +32,7 @@ import { CAMERE } from '../../data/camere';
     <div class="app" id="app" hidden>
       <header class="app-testa">
         <div class="app-testa-sx">
-          <Logo variante="marchio" class="app-logo" />
+          <Logo variante="marchio" class="app-logo" targa />
           <div>
             <b>La Roscignola</b>
             <span id="sync-stato" class="sync-stato">Sincronizzato</span>
@@ -642,7 +642,8 @@ import { CAMERE } from '../../data/camere';
     line-height: 1.1;
   }
   .app-logo {
-    width: 44px;
+    width: 46px;
+    padding: 3px 5px !important;
     color: var(--avorio);
     --logo-occhio: var(--bordeaux);
     flex: none;
