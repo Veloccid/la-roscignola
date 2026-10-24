@@ -1,0 +1,101 @@
+---
+import Foto from '../../components/Foto.astro';
+import Appartamento from '../../components/Appartamento.astro';
+import Recensioni from '../../components/Recensioni.astro';
+import Calendario from '../../components/Calendario.astro';
+import BloccoContatti from '../../components/BloccoContatti.astro';
+import { SERVIZI_CASA } from '../../data/camere';
+import { SITO } from '../../config';
+import { link } from '../../temi';
+const { tema } = Astro.props;
+---
+
+<section class="contenitore ap">
+  <span class="occhiello">Oasi naturale · Monte San Giovanni Campano</span>
+  <h1>Una casa con piscina <span class="corsivo">tra ulivi e vigneti</span></h1>
+  <p class="tenue">Appartamento in villa, 58 m² e piscina a uso esclusivo sulle colline della Ciociaria. Fino a 4 ospiti, animali benvenuti.</p>
+  <div class="azioni">
+    <a class="btn" href={link(tema, 'disponibilita')}>Vedi le date libere</a>
+    <a class="btn btn--vuoto" href={link(tema, 'appartamento')}>L’appartamento</a>
+  </div>
+  <p class="voto"><b>{SITO.recensioni.voto}</b> su Booking · {SITO.recensioni.numero} recensioni</p>
+</section>
+
+<section class="contenitore larga">
+  <Foto foto="piscinaColline" soggetto="" rapporto="21 / 9" />
+</section>
+
+<section class="sezione contenitore tre">
+  {SERVIZI_CASA.slice(0, 3).map((s) => (
+    <div class="rivela"><h3>{s.titolo}</h3><p class="tenue">{s.testo}</p></div>
+  ))}
+</section>
+
+<section class="sezione-sabbia">
+  <div class="contenitore sezione">
+    <h2 class="centro">La casa</h2>
+    <Appartamento tema={tema} />
+  </div>
+</section>
+
+<section class="sezione contenitore"><Recensioni limite={6} /></section>
+
+<section class="sezione-sabbia">
+  <div class="contenitore sezione">
+    <h2 class="centro">Quando vuoi venire?</h2>
+    <Calendario tema={tema} />
+  </div>
+</section>
+
+<BloccoContatti tema={tema} />
+
+<style>
+  .ap {
+    text-align: center;
+    max-width: 860px;
+    padding-block: clamp(48px, 8vw, 110px) clamp(32px, 5vw, 56px);
+  }
+  .ap h1 {
+    font-size: clamp(2.6rem, 6.5vw, 5rem);
+  }
+  .ap p.tenue {
+    font-size: 1.1rem;
+    max-width: 52ch;
+    margin-inline: auto;
+  }
+  .azioni {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 12px;
+    margin-top: 24px;
+  }
+  .voto {
+    margin-top: 20px;
+    font-size: 0.9rem;
+    color: var(--tenue);
+  }
+  .voto b {
+    background: var(--bordeaux);
+    color: var(--avorio);
+    padding: 3px 8px;
+    border-radius: 6px 6px 6px 0;
+    font-weight: 500;
+  }
+  .tre {
+    display: grid;
+    gap: 28px;
+    text-align: center;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  }
+  .tre h3 {
+    color: var(--bordeaux);
+  }
+  .sezione-sabbia {
+    background: var(--sabbia);
+  }
+  .centro {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+</style>

@@ -3,33 +3,17 @@ import Layout from '../../layouts/Layout.astro';
 import { percorsiTemi, type Tema } from '../../temi';
 import Essenziale from '../../proposte/essenziale/Home.astro';
 import Bordeaux from '../../proposte/bordeaux/Home.astro';
-import Diario from '../../proposte/diario/Home.astro';
-import Canto from '../../proposte/canto/Home.astro';
-import Cancello from '../../proposte/cancello/Home.astro';
-import Casa from '../../proposte/casa/Home.astro';
-import Date from '../../proposte/date/Home.astro';
-import Chiavi from '../../proposte/chiavi/Home.astro';
-import Giornata from '../../proposte/giornata/Home.astro';
-import Foto from '../../proposte/foto/Home.astro';
+import Centrale from '../../proposte/centrale/Home.astro';
+import Salvia from '../../proposte/salvia/Home.astro';
+import Meta from '../../proposte/meta/Home.astro';
 
 export function getStaticPaths() {
   return percorsiTemi();
 }
 const { tema } = Astro.props as { tema: Tema };
-const HOME: Record<string, any> = {
-  essenziale: Essenziale,
-  bordeaux: Bordeaux,
-  diario: Diario,
-  canto: Canto,
-  cancello: Cancello,
-  casa: Casa,
-  date: Date,
-  chiavi: Chiavi,
-  giornata: Giornata,
-  foto: Foto,
-};
+const HOME: Record<string, any> = { essenziale: Essenziale, bordeaux: Bordeaux, centrale: Centrale, salvia: Salvia, meta: Meta };
 const Home = HOME[tema.id];
-const trasparente = ['bordeaux', 'foto'].includes(tema.id);
+const trasparente = ['bordeaux', 'salvia'].includes(tema.id);
 ---
 
 <Layout tema={tema} trasparente={trasparente}>

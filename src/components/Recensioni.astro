@@ -1,0 +1,180 @@
+---
+// Recensioni scelte a mano (src/data/recensioni.ts) + voto generale (src/config.ts).
+import { RECENSIONI, PUNTEGGI } from '../data/recensioni';
+import { SITO } from '../config';
+interface Props {
+  limite?: number;
+  titolo?: string;
+  class?: string;
+}
+const { limite, titolo = 'Cosa dicono gli ospiti', class: classe = '' } = Astro.props;
+const elenco = limite ? RECENSIONI.slice(0, limite) : RECENSIONI;
+const voto = Number(SITO.recensioni.voto.replace(',', '.'));
+const giudizio = voto >= 9 ? 'Eccellente' : voto >= 8.5 ? 'Favoloso' : voto >= 8 ? 'Ottimo' : 'Buono';
+---
+
+<div class:list={['rec', classe]}>
+  <div class="rec-testa">
+    <div class="rec-voto">
+      <b>{SITO.recensioni.voto}</b>
+      <div>
+        <strong>{giudizio}</strong>
+        <span>{SITO.recensioni.numero} recensioni su {SITO.recensioni.fonte}</span>
+      </div>
+    </div>
+    <h2>{titolo}</h2>
+    <ul class="rec-punteggi">
+      {
+        PUNTEGGI.map((p) => (
+          <li style={`--v:${Number(p.voto.replace(',', '.')) * 10}%`}>
+            <span>{p.nome}</span>
+            <i></i>
+            <b>{p.voto}</b>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+  <div class="rec-lista">
+    {
+      elenco.map((r) => (
+        <figure class="rec-card">
+          <div class="rec-card-voto">{r.voto}<small>/10</small></div>
+          {r.titolo && <p class="rec-titolo">{r.titolo}</p>}
+          <blockquote>«{r.testo}»</blockquote>
+          <figcaption>
+            <b>{r.nome}</b> · {r.paese}
+            <span>
+              {r.tipo} · {r.data} · {r.fonte}
+            </span>
+          </figcaption>
+        </figure>
+      ))
+    }
+  </div>
+  <p class="rec-tutte">
+    <a href={SITO.canali.booking} target="_blank" rel="noopener">Leggi tutte le recensioni su Booking →</a>
+  </p>
+</div>
+
+<style>
+  .rec-testa {
+    display: grid;
+    gap: 20px 48px;
+    align-items: end;
+    margin-bottom: 32px;
+  }
+  @media (min-width: 900px) {
+    .rec-testa {
+      grid-template-columns: auto 1fr;
+      align-items: center;
+    }
+    .rec-testa h2 {
+      grid-column: 1 / -1;
+      grid-row: 1;
+    }
+  }
+  .rec-voto {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .rec-voto b {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 2.6rem;
+    line-height: 1;
+    background: var(--bordeaux);
+    color: var(--avorio);
+    padding: 14px 16px;
+    border-radius: 14px 14px 14px 2px;
+  }
+  .rec-voto strong {
+    display: block;
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 1.5rem;
+  }
+  .rec-voto span {
+    font-size: 0.88rem;
+    color: var(--tenue);
+  }
+  .rec-punteggi {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 8px 32px;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  }
+  .rec-punteggi li {
+    display: grid;
+    grid-template-columns: 1fr 70px 2.2em;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.88rem;
+  }
+  .rec-punteggi i {
+    height: 6px;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--bordeaux) var(--v), color-mix(in srgb, var(--bordeaux) 12%, transparent) var(--v));
+  }
+  .rec-lista {
+    columns: 1;
+    column-gap: 18px;
+  }
+  @media (min-width: 700px) {
+    .rec-lista {
+      columns: 2;
+    }
+  }
+  @media (min-width: 1100px) {
+    .rec-lista {
+      columns: 3;
+    }
+  }
+  .rec-card {
+    break-inside: avoid;
+    margin: 0 0 18px;
+    padding: 22px 22px 18px;
+    background: var(--superficie);
+    border: 1px solid var(--linea);
+    border-radius: 16px;
+    position: relative;
+  }
+  .rec-card-voto {
+    display: inline-block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: var(--bordeaux);
+  }
+  .rec-card-voto small {
+    color: var(--tenue);
+    font-weight: 400;
+  }
+  .rec-titolo {
+    font-family: var(--serif);
+    font-size: 1.2rem;
+    margin: 0 0 8px;
+    color: var(--bordeaux);
+  }
+  .rec-card blockquote {
+    margin: 0 0 14px;
+    font-size: 0.98rem;
+    line-height: 1.55;
+  }
+  .rec-card figcaption {
+    font-size: 0.88rem;
+  }
+  .rec-card figcaption span {
+    display: block;
+    font-size: 0.78rem;
+    color: var(--tenue);
+    margin-top: 2px;
+  }
+  .rec-tutte a {
+    color: var(--bordeaux);
+    font-weight: 500;
+  }
+</style>

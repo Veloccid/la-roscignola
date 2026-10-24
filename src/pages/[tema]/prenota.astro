@@ -59,9 +59,10 @@ const { tema } = Astro.props as { tema: Tema };
 
 <script>
   import { CAMERE } from '../../data/camere';
-  import { carica, libera, prezzo, notti, dataLunga, euro, aggiungi, oggi } from '../../lib/prenotazioni';
+  import { caricaEsterne, carica, libera, prezzo, notti, dataLunga, euro, aggiungi, oggi } from '../../lib/prenotazioni';
 
   carica();
+  await caricaEsterne();
   const q = new URLSearchParams(location.search);
   const cam = CAMERE.find((c) => c.id === q.get('camera'));
   const dal = q.get('dal') || '';

@@ -1,4 +1,5 @@
 ---
+import Recensioni from '../../components/Recensioni.astro';
 import Appartamento from '../../components/Appartamento.astro';
 import Foto from '../../components/Foto.astro';
 import SchedaCamera from '../../components/SchedaCamera.astro';
@@ -29,6 +30,8 @@ const { tema } = Astro.props;
   </div>
   <div class="rivela app-spazio"><Appartamento tema={tema} /></div>
 </section>
+
+<section class="sezione contenitore"><Recensioni limite={6} /></section>
 
 <section class="sezione cal-sezione">
   <div class="contenitore">

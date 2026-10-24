@@ -1,0 +1,144 @@
+---
+import Foto from '../../components/Foto.astro';
+import Recensioni from '../../components/Recensioni.astro';
+import Calendario from '../../components/Calendario.astro';
+import BloccoContatti from '../../components/BloccoContatti.astro';
+import { CAMERE, SERVIZI_CASA } from '../../data/camere';
+import { link } from '../../temi';
+const { tema } = Astro.props;
+const a = CAMERE[0];
+---
+
+<div class="meta">
+  <aside class="meta-foto"><Foto foto="piscinaColline" soggetto="" rapporto="3 / 4" /></aside>
+  <div class="meta-testo">
+    <section class="blocco">
+      <span class="occhiello">Oasi naturale · Ciociaria</span>
+      <h1>Piscina, ulivi e <span class="corsivo">nient’altro</span></h1>
+      <p class="tenue grande">{a.breve}</p>
+      <div class="azioni">
+        <a class="btn" href={link(tema, 'disponibilita')}>Vedi le date libere</a>
+        <a class="btn btn--vuoto" href={link(tema, 'appartamento')}>Tutte le foto</a>
+      </div>
+    </section>
+
+    <section class="blocco">
+      <h2>La casa</h2>
+      <p>{a.descrizione}</p>
+      <div class="mini-foto">
+        <Foto foto="cameraMatrimoniale" soggetto="" rapporto="1 / 1" />
+        <Foto foto="cucinaCamino" soggetto="" rapporto="1 / 1" />
+        <Foto foto="giardino" soggetto="" rapporto="1 / 1" />
+      </div>
+      <dl class="dati">
+        <div><dt>Ospiti</dt><dd>fino a {a.ospiti}</dd></div>
+        <div><dt>Spazio</dt><dd>{a.mq} m²</dd></div>
+        <div><dt>Letti</dt><dd>{a.letti}</dd></div>
+        <div><dt>Prezzo</dt><dd>da {a.prezzo}€ / notte</dd></div>
+      </dl>
+    </section>
+
+    <section class="blocco">
+      <h2>Cosa trovi</h2>
+      <ul class="elenco">{SERVIZI_CASA.map((s) => <li><b>{s.titolo}</b><span class="tenue">{s.testo}</span></li>)}</ul>
+    </section>
+
+    <section class="blocco stretto"><Recensioni limite={4} /></section>
+
+    <section class="blocco">
+      <h2>Le date</h2>
+      <Calendario tema={tema} mesi={1} />
+    </section>
+  </div>
+</div>
+
+<BloccoContatti tema={tema} />
+
+<style>
+  .meta {
+    display: grid;
+  }
+  .meta-foto :global(.foto) {
+    --raggio-foto: 0;
+  }
+  @media (min-width: 1000px) {
+    .meta {
+      grid-template-columns: 1fr 1fr;
+    }
+    .meta-foto {
+      position: sticky;
+      top: 72px;
+      height: calc(100vh - 72px);
+    }
+    .meta-foto :global(.foto) {
+      height: 100%;
+      aspect-ratio: auto !important;
+    }
+  }
+  .meta-testo {
+    padding: 0 var(--gutter);
+    max-width: 680px;
+  }
+  .blocco {
+    padding-block: clamp(48px, 7vw, 88px);
+    border-bottom: 1px solid var(--linea);
+  }
+  .blocco:last-child {
+    border-bottom: 0;
+  }
+  .grande {
+    font-size: 1.12rem;
+  }
+  .azioni {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 20px;
+  }
+  .mini-foto {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin: 20px 0;
+  }
+  .dati {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 0;
+  }
+  .dati dt {
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--tenue);
+  }
+  .dati dd {
+    margin: 0;
+    font-family: var(--serif);
+    font-size: 1.15rem;
+  }
+  .elenco {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .elenco li {
+    display: grid;
+    gap: 2px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--linea);
+  }
+  .elenco b {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: 1.2rem;
+    color: var(--bordeaux);
+  }
+  .stretto :global(.rec-lista) {
+    columns: 1 !important;
+  }
+  .stretto :global(.rec-testa) {
+    grid-template-columns: 1fr !important;
+  }
+</style>

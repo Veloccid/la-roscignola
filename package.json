@@ -9,8 +9,9 @@
     "preview": "astro preview"
   },
   "dependencies": {
-    "astro": "^5.14.0",
+    "@astrojs/vercel": "^8.2.11",
     "@fontsource/bodoni-moda": "^5.2.0",
-    "@fontsource/jost": "^5.2.0"
+    "@fontsource/jost": "^5.2.0",
+    "astro": "^5.14.0"
   }
 }

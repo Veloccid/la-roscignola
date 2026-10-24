@@ -1,0 +1,120 @@
+---
+import Foto from '../../components/Foto.astro';
+import Appartamento from '../../components/Appartamento.astro';
+import Recensioni from '../../components/Recensioni.astro';
+import Calendario from '../../components/Calendario.astro';
+import BloccoContatti from '../../components/BloccoContatti.astro';
+import { SERVIZI_CASA } from '../../data/camere';
+import { link } from '../../temi';
+const { tema } = Astro.props;
+---
+
+<section class="ap">
+  <div class="ap-testo">
+    <span class="occhiello">Oasi naturale · Ciociaria</span>
+    <h1>La natura, la piscina, <span class="corsivo">il silenzio</span></h1>
+    <p>Un appartamento in villa tra ulivi e vigneti della Ciociaria, con piscina e giardino tutti per voi.</p>
+    <div class="azioni">
+      <a class="btn btn--chiaro" href={link(tema, 'disponibilita')}>Prenota le tue date</a>
+      <a class="ap-link" href="#casa">Scopri la casa ↓</a>
+    </div>
+  </div>
+  <div class="ap-foto"><Foto foto="piscinaGiardino" soggetto="" rapporto="4 / 5" /></div>
+</section>
+
+<section class="sezione contenitore servizi">
+  {SERVIZI_CASA.map((s, i) => (
+    <div class="rivela"><span class="num">0{i + 1}</span><h3>{s.titolo}</h3><p class="tenue">{s.testo}</p></div>
+  ))}
+</section>
+
+<section class="blocco-salvia" id="casa">
+  <div class="contenitore sezione"><Appartamento tema={tema} /></div>
+</section>
+
+<section class="sezione contenitore"><Recensioni limite={6} /></section>
+
+<section class="blocco-vinaccia">
+  <div class="contenitore sezione">
+    <span class="occhiello">Disponibilità</span>
+    <h2>Scegli i giorni</h2>
+    <Calendario tema={tema} />
+  </div>
+</section>
+
+<BloccoContatti tema={tema} />
+
+<style>
+  .ap {
+    display: grid;
+    background: var(--salvia);
+    color: var(--avorio);
+    min-height: 92vh;
+  }
+  @media (min-width: 900px) {
+    .ap {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .ap-testo {
+    padding: 120px var(--gutter) 56px;
+    display: grid;
+    align-content: center;
+    justify-items: start;
+    gap: 6px;
+    max-width: 640px;
+    margin-left: auto;
+  }
+  .ap .occhiello {
+    color: var(--avorio);
+    opacity: 0.85;
+  }
+  .ap h1 {
+    font-size: clamp(2.4rem, 5vw, 4.2rem);
+  }
+  .ap p {
+    font-size: 1.1rem;
+    color: rgba(246, 240, 231, 0.9);
+    max-width: 44ch;
+  }
+  .azioni {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    align-items: center;
+    margin-top: 12px;
+  }
+  .ap-link {
+    color: var(--avorio);
+  }
+  .ap-foto :global(.foto) {
+    --raggio-foto: 0;
+    height: 100%;
+    aspect-ratio: auto !important;
+    min-height: 360px;
+  }
+  .servizi {
+    display: grid;
+    gap: 32px;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  }
+  .num {
+    font-family: var(--serif);
+    font-size: 1.6rem;
+    color: var(--salvia);
+  }
+  .servizi h3 {
+    color: var(--bordeaux);
+    margin-top: 4px;
+  }
+  .blocco-salvia {
+    background: var(--salvia-chiara);
+  }
+  .blocco-vinaccia {
+    background: var(--bordeaux);
+    color: var(--avorio);
+  }
+  .blocco-vinaccia .occhiello {
+    color: var(--oro);
+  }
+</style>

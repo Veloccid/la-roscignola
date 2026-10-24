@@ -1,0 +1,18 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Recensioni from '../../components/Recensioni.astro';
+import BloccoContatti from '../../components/BloccoContatti.astro';
+import { percorsiTemi, type Tema } from '../../temi';
+export function getStaticPaths() {
+  return percorsiTemi();
+}
+const { tema } = Astro.props as { tema: Tema };
+---
+
+<Layout tema={tema} titolo="Recensioni" pagina="recensioni">
+  <section class="sezione contenitore">
+    <span class="occhiello">Recensioni</span>
+    <Recensioni titolo="Dicono di noi" />
+  </section>
+  <BloccoContatti tema={tema.id} titolo="Vieni a scrivere la tua" />
+</Layout>

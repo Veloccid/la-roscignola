@@ -20,6 +20,7 @@ export interface Prenotazione {
   pagato?: boolean;
   note?: string;
   creata: string;
+  demo?: boolean; // prenotazione di esempio
 }
 
 export interface Stato {
@@ -86,6 +87,7 @@ function seme(): Stato {
       totale: fonte === 'blocco' ? 0 : cam.prezzo * n,
       pagato: fonte !== 'blocco',
       creata: piuGiorni(t, -7),
+      demo: true,
       ...extra,
     };
   };
@@ -222,4 +224,39 @@ export function ics(camera: string) {
   }
   righe.push('END:VCALENDAR');
   return righe.join('\r\n');
+}
+
+// ---------- calendari veri di Booking e Airbnb ----------
+export interface StatoSync {
+  configurato: boolean;
+  aggiornato: string;
+  fonti: Record<string, { configurato: boolean; ok: boolean; eventi: number; errore?: string }>;
+  occupati: { camera: string; fonte: 'booking' | 'airbnb'; uid: string; dal: string; al: string }[];
+}
+let richiesta: Promise<StatoSync | null> | null = null;
+
+/** Legge /api/disponibilita. Se i link iCal sono configurati, sostituisce i dati di esempio con le date vere. */
+export function caricaEsterne(forza = false): Promise<StatoSync | null> {
+  if (richiesta && !forza) return richiesta;
+  richiesta = fetch('/api/disponibilita', { cache: forza ? 'reload' : 'default' })
+    .then((r) => (r.ok ? r.json() : null))
+    .then((d: StatoSync | null) => {
+      if (!d || !d.configurato) return d;
+      const s = carica();
+      s.prenotazioni = s.prenotazioni.filter((p) => !p.demo && p.fonte !== 'airbnb' && p.fonte !== 'booking');
+      for (const o of d.occupati)
+        s.prenotazioni.push({
+          id: o.uid,
+          camera: o.camera,
+          dal: o.dal,
+          al: o.al,
+          ospite: o.fonte === 'booking' ? 'Prenotazione Booking' : 'Prenotazione Airbnb',
+          fonte: o.fonte,
+          creata: oggi(),
+        });
+      salva(s);
+      return d;
+    })
+    .catch(() => null);
+  return richiesta;
 }

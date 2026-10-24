@@ -105,9 +105,9 @@ import { CAMERE } from '../../data/camere';
           <div class="riquadro spiega">
             <h2>Come funziona</h2>
             <ol>
-              <li><b>Da Airbnb e Booking verso il sito:</b> incolla qui il link del calendario (iCal) che trovi su Airbnb in <i>Calendario → Disponibilità → Collega calendari</i> e su Booking in <i>Tariffe e disponibilità → Sincronizza calendari</i>.</li>
-              <li><b>Dal sito verso Airbnb e Booking:</b> copia il link “da dare ai portali” di ogni camera e incollalo negli stessi menu. Così una prenotazione fatta sul sito chiude le date anche lì.</li>
-              <li>Il sito controlla i calendari in automatico ogni 15 minuti; puoi forzarlo con “Sincronizza ora”.</li>
+              <li><b>Da Airbnb e Booking verso il sito (attivo):</b> il sito legge i calendari dei portali e chiude da solo le date già prenotate. Controlla ogni 15 minuti.</li>
+              <li><b>Dove si mettono i link:</b> su Vercel → progetto <i>la-roscignola</i> → <i>Settings → Environment Variables</i>, con i nomi <code>ICAL_BOOKING_APPARTAMENTO</code> e <code>ICAL_AIRBNB_APPARTAMENTO</code>. Su Booking il link si trova in <i>Tariffe e disponibilità → Sincronizza calendari → Esporta</i>, su Airbnb in <i>Calendario → Disponibilità → Collega calendari → Esporta</i>.</li>
+              <li><b>Dal sito verso Airbnb e Booking:</b> arriva nella fase 2, insieme al pagamento online vero e al database delle prenotazioni del sito.</li>
             </ol>
           </div>
           <div id="sync-camere" class="sync-camere"></div>
@@ -171,7 +171,8 @@ import { CAMERE } from '../../data/camere';
     aggiungi,
     rimuovi,
     impostaPrezzo,
-    sincronizzaDemo,
+    caricaEsterne,
+    type StatoSync,
     ics,
     oggi,
     piuGiorni,
@@ -196,6 +197,7 @@ import { CAMERE } from '../../data/camere';
     $('#accesso').hidden = true;
     $('#app').hidden = false;
     tutto();
+    aggiornaSync();
   }
   try {
     if (sessionStorage.getItem(CHIAVE_ACCESSO) === '1') entra();
@@ -363,44 +365,42 @@ import { CAMERE } from '../../data/camere';
   ['#cerca', '#f-quando', '#f-fonte'].forEach((s) => $(s).addEventListener('input', elenco));
 
   // ---------- sync ----------
+  var statoSync: StatoSync | null = null;
   function sync() {
-    const s = carica();
-    $('#sync-camere').innerHTML = CAMERE.map((c) => {
-      const x = s.sync[c.id];
-      const quando = x?.ultima ? new Date(x.ultima).toLocaleString('it-IT', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'mai';
-      return `<div class="riquadro sync-camera">
-        <div class="sync-testa"><h3>${c.nome}</h3><span class="tenue">Ultimo controllo: ${quando}</span></div>
-        <label>Link calendario Airbnb <span class="tenue">(da importare)</span><input data-sync="${c.id}" data-canale="airbnb" value="${esc(x?.airbnb)}" /></label>
-        <label>Link calendario Booking <span class="tenue">(da importare)</span><input data-sync="${c.id}" data-canale="booking" value="${esc(x?.booking)}" /></label>
-        <label>Link da dare ad Airbnb e Booking<div class="copia"><input readonly value="https://laroscignola.it/ical/${c.id}.ics" /><button type="button" class="btn btn--vuoto" data-copia="https://laroscignola.it/ical/${c.id}.ics">Copia</button></div></label>
+    const etichetta = (k: string) => (k.startsWith('booking') ? 'Booking' : 'Airbnb');
+    const righe = statoSync
+      ? Object.entries(statoSync.fonti)
+          .map(
+            ([k, f]) => `<li><b>${etichetta(k)}</b><span>${
+              !f.configurato ? '<i class="st st--no">Link non inserito</i>' : f.ok ? `<i class="st st--ok">Collegato</i> ${f.eventi} prenotazioni future` : `<i class="st st--err">Errore</i> ${esc(f.errore)}`
+            }</span></li>`,
+          )
+          .join('')
+      : '<li><span class="tenue">Stato non disponibile in locale: la sincronizzazione funziona sul sito pubblicato su Vercel.</span></li>';
+    const quando = statoSync?.aggiornato ? new Date(statoSync.aggiornato).toLocaleString('it-IT', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '—';
+    $('#sync-camere').innerHTML = `<div class="riquadro sync-camera">
+        <div class="sync-testa"><h3>${CAMERE[0].nome}</h3><span class="tenue">Ultimo controllo: ${quando}</span></div>
+        <ul class="sync-lista">${righe}</ul>
+        ${statoSync && !statoSync.configurato ? '<p class="tenue">Per ora il calendario mostra prenotazioni di esempio. Appena inserisci i link su Vercel compaiono quelle vere.</p>' : ''}
         <div class="sync-azioni">
-          <button type="button" class="btn" data-sincro="${c.id}">Sincronizza ora</button>
-          <button type="button" class="btn btn--vuoto" data-ics="${c.id}">Scarica file .ics</button>
+          <button type="button" class="btn" data-sincro="1">Controlla ora</button>
+          <button type="button" class="btn btn--vuoto" data-ics="${CAMERE[0].id}">Scarica calendario .ics</button>
         </div>
       </div>`;
-    }).join('');
+    $('#sync-stato').textContent = statoSync?.configurato ? 'Collegato a Booking/Airbnb' : 'Dati di esempio';
   }
-  $('#sync-camere').addEventListener('change', (e) => {
-    const i = e.target as HTMLInputElement;
-    if (!i.dataset.sync) return;
-    const s = carica();
-    (s.sync[i.dataset.sync] as any)[i.dataset.canale!] = i.value;
-    salva(s);
-    avviso('Link salvato');
-  });
+  async function aggiornaSync(forza = false) {
+    statoSync = await caricaEsterne(forza);
+    tutto();
+  }
   $('#sync-camere').addEventListener('click', async (e) => {
     const b = (e.target as HTMLElement).closest<HTMLButtonElement>('button');
     if (!b) return;
     if (b.dataset.sincro) {
       b.disabled = true;
       b.textContent = 'Controllo…';
-      $('#sync-stato').textContent = 'Sincronizzazione…';
-      setTimeout(() => {
-        sincronizzaDemo(b.dataset.sincro);
-        $('#sync-stato').textContent = 'Sincronizzato';
-        avviso('Calendari Airbnb e Booking aggiornati');
-        tutto();
-      }, 900);
+      await aggiornaSync(true);
+      avviso(statoSync?.configurato ? 'Calendari aggiornati' : 'Nessun link iCal inserito su Vercel');
     } else if (b.dataset.ics) {
       const blob = new Blob([ics(b.dataset.ics)], { type: 'text/calendar' });
       const a = document.createElement('a');
@@ -408,13 +408,6 @@ import { CAMERE } from '../../data/camere';
       a.download = `roscignola-${b.dataset.ics}.ics`;
       a.click();
       setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-    } else if (b.dataset.copia) {
-      try {
-        await navigator.clipboard.writeText(b.dataset.copia);
-        avviso('Link copiato');
-      } catch {
-        avviso('Copia non riuscita: seleziona il link a mano');
-      }
     }
   });
 
@@ -1154,6 +1147,45 @@ import { CAMERE } from '../../data/camere';
   .copia .btn {
     min-height: 46px;
     flex: none;
+  }
+  .sync-lista {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .sync-lista li {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--linea);
+    font-size: 0.92rem;
+  }
+  .st {
+    font-style: normal;
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 999px;
+    margin-right: 6px;
+  }
+  .st--ok {
+    background: #dfeedd;
+    color: #2f6b2a;
+  }
+  .st--no {
+    background: #efe7dc;
+    color: var(--tenue);
+  }
+  .st--err {
+    background: #f6dcdc;
+    color: #a3242f;
+  }
+  .spiega code {
+    font-size: 0.82em;
+    background: var(--avorio);
+    padding: 1px 5px;
+    border-radius: 4px;
   }
   .sync-azioni {
     display: flex;
