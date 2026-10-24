@@ -11,7 +11,9 @@ import { CAMERE } from '../../data/camere';
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
     <title>Area proprietario · La Roscignola</title>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   </head>
   <body class="adm">
     <!-- ACCESSO -->
@@ -32,7 +34,7 @@ import { CAMERE } from '../../data/camere';
     <div class="app" id="app" hidden>
       <header class="app-testa">
         <div class="app-testa-sx">
-          <Logo variante="marchio" class="app-logo" targa />
+          <Logo variante="marchio" class="app-logo" bianco />
           <div>
             <b>La Roscignola</b>
             <span id="sync-stato" class="sync-stato">Sincronizzato</span>
@@ -635,8 +637,7 @@ import { CAMERE } from '../../data/camere';
     line-height: 1.1;
   }
   .app-logo {
-    width: 46px;
-    padding: 3px 5px !important;
+    width: 34px;
     color: var(--avorio);
     --logo-occhio: var(--bordeaux);
     flex: none;

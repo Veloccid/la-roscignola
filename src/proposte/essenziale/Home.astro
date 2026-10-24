@@ -1,4 +1,5 @@
 ---
+import Logo from '../../components/Logo.astro';
 import Recensioni from '../../components/Recensioni.astro';
 import Appartamento from '../../components/Appartamento.astro';
 import Foto from '../../components/Foto.astro';
@@ -12,6 +13,7 @@ const { tema } = Astro.props;
 
 <section class="contenitore apertura">
   <div class="apertura-testo">
+    <Logo variante="marchio" class="ap-r" />
     <span class="occhiello">Oasi naturale · Ciociaria</span>
     <h1>Dormire dove canta <span class="corsivo">l’usignolo</span></h1>
     <p class="tenue">Un appartamento in villa con piscina tutta per voi, tra ulivi e vigneti sulle colline della Ciociaria. Scegli le date libere e prenota in due minuti. <span class="provvisorio">Testo provvisorio</span></p>
@@ -67,6 +69,10 @@ const { tema } = Astro.props;
       grid-template-columns: 1fr 1.1fr;
       gap: 64px;
     }
+  }
+  .apertura-testo :global(.ap-r) {
+    width: 54px;
+    margin-bottom: 18px;
   }
   .apertura-testo p {
     font-size: 1.1rem;

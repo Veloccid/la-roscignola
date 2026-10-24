@@ -1,46 +1,43 @@
 ---
-// Logo ORIGINALE del cliente (public/logo/la-roscignola-logo.jpg, file non modificato).
-// Il file è un JPG 728×275 con sfondo bianco: qui viene solo ritagliato via CSS
-// e fuso con lo sfondo (mix-blend-mode: multiply) così il bianco non si vede sugli sfondi chiari.
-// Sugli sfondi scuri usare `targa` per metterlo su una targhetta color avorio.
-// Quando arriva un PNG trasparente o un SVG basta cambiare FILE e togliere il multiply.
+// Loghi ORIGINALI del cliente (PNG trasparenti 1500×1500, non modificati), ritagliati solo via CSS.
+//   completo vinaccia → /logo/logo-roscignola.png         (sfondi chiari)
+//   completo bianco   → /logo/logo-roscignola-bianco.png  (sfondi scuri / foto)
+//   marchio vinaccia  → /logo/r-roscignola.png            (la R con la piuma)
+//   marchio bianco    → /logo/r-roscignola-bianca.png
 interface Props {
   variante?: 'completo' | 'marchio';
-  targa?: boolean;
+  bianco?: boolean;
   class?: string;
   titolo?: string;
 }
-const { variante = 'completo', targa = false, class: classe = '', titolo = 'La Roscignola' } = Astro.props;
+const { variante = 'completo', bianco = false, class: classe = '', titolo = 'La Roscignola' } = Astro.props;
 
-const FILE = '/logo/la-roscignola-logo.jpg';
-const W = 728;
-const H = 275;
-// zone di ritaglio nel file originale (pixel)
-const RITAGLI = {
-  completo: { x: 44, y: 64, w: 608, h: 160 }, // scritta ROSCIGNOLA con piuma e grappolo
-  marchio: { x: 44, y: 64, w: 126, h: 140 }, // solo la R con la piuma
+const LATO = 1500;
+const FILE = {
+  completo: { vinaccia: '/logo/logo-roscignola.png', bianco: '/logo/logo-roscignola-bianco.png' },
+  marchio: { vinaccia: '/logo/r-roscignola.png', bianco: '/logo/r-roscignola-bianca.png' },
 };
-const r = RITAGLI[variante];
+// zone utili dentro il quadrato 1500×1500 (pixel), con un piccolo margine
+const RITAGLI = {
+  completo: { vinaccia: { x: 28, y: 582, w: 1420, h: 334 }, bianco: { x: 34, y: 590, w: 1420, h: 327 } },
+  marchio: { vinaccia: { x: 88, y: 98, w: 1311, h: 1311 }, bianco: { x: 119, y: 130, w: 1253, h: 1239 } },
+};
+const colore = bianco ? 'bianco' : 'vinaccia';
+const r = RITAGLI[variante][colore];
 const stile = [
   `--rapporto:${r.w} / ${r.h}`,
-  `--larghezza:${((W / r.w) * 100).toFixed(3)}%`,
+  `--larghezza:${((LATO / r.w) * 100).toFixed(3)}%`,
   `--sx:${((-r.x / r.w) * 100).toFixed(3)}%`,
   `--su:${((-r.y / r.h) * 100).toFixed(3)}%`,
 ].join(';');
 ---
 
-<span class:list={['logo', `logo--${variante}`, { 'logo--targa': targa }, classe]} style={stile} role="img" aria-label={titolo}>
-  <span class="logo-finestra">
-    <img src={FILE} alt="" width={W} height={H} decoding="async" />
-  </span>
+<span class:list={['logo', `logo--${variante}`, `logo--${colore}`, classe]} style={stile} role="img" aria-label={titolo}>
+  <img src={FILE[variante][colore]} alt="" width={LATO} height={LATO} decoding="async" />
 </span>
 
 <style>
   .logo {
-    display: block;
-    border-radius: 10px;
-  }
-  .logo-finestra {
     display: block;
     position: relative;
     overflow: hidden;
@@ -53,15 +50,7 @@ const stile = [
     width: var(--larghezza);
     max-width: none;
     height: auto;
-    mix-blend-mode: multiply;
-    /* schiarisce la texture grigia dell'angolo del file fino al bianco, senza modificare il file */
-    filter: brightness(1.07) contrast(1.08);
     user-select: none;
     -webkit-user-drag: none;
-  }
-  .logo--targa {
-    background: #fff;
-    padding: 0.5em 0.8em;
-    box-shadow: 0 6px 20px -10px rgba(0, 0, 0, 0.45);
   }
 </style>

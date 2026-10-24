@@ -27,7 +27,7 @@ export const CAMERE: Camera[] = [
     mq: 58,
     prezzo: 75,
     servizi: ['Piscina a uso esclusivo', 'Cucina privata', 'Caminetto a legna', 'Giardino e barbecue', 'Parcheggio privato', 'Ricarica auto elettriche', 'Wi‑Fi', 'Animali ammessi'],
-    tinta: ['#6B1C18', '#B48F5A'],
+    tinta: ['#840202', '#B48F5A'],
     foto: '/foto/camera-matrimoniale.jpg',
     piano: 'Appartamento in villa',
   },

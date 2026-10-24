@@ -11,7 +11,7 @@ const { tema } = Astro.props;
 
 <section class="ap">
   <div class="contenitore ap-in">
-    <Logo class="ap-logo" targa />
+    <Logo class="ap-logo" bianco />
     <p class="ap-frase">Oasi naturale · piscina · giardino tra gli ulivi</p>
     <div class="ap-azioni">
       <a class="btn btn--chiaro" href={link(tema, 'disponibilita')}>Prenota le tue date</a>
@@ -79,9 +79,7 @@ const { tema } = Astro.props;
     padding-bottom: 48px;
   }
   .ap :global(.ap-logo) {
-    width: min(640px, 92%);
-    padding: clamp(16px, 3vw, 32px) clamp(20px, 4vw, 48px);
-    border-radius: 18px;
+    width: min(680px, 90%);
     animation: entra 1.2s ease both;
   }
   .ap-frase {

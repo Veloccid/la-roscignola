@@ -1,4 +1,5 @@
 ---
+import Logo from '../../components/Logo.astro';
 import Foto from '../../components/Foto.astro';
 import Appartamento from '../../components/Appartamento.astro';
 import Recensioni from '../../components/Recensioni.astro';
@@ -11,6 +12,7 @@ const { tema } = Astro.props;
 
 <section class="ap">
   <div class="ap-testo">
+    <Logo bianco class="ap-logo" />
     <span class="occhiello">Oasi naturale · Ciociaria</span>
     <h1>La natura, la piscina, <span class="corsivo">il silenzio</span></h1>
     <p>Un appartamento in villa tra ulivi e vigneti della Ciociaria, con piscina e giardino tutti per voi.</p>
@@ -64,6 +66,10 @@ const { tema } = Astro.props;
     gap: 6px;
     max-width: 640px;
     margin-left: auto;
+  }
+  .ap :global(.ap-logo) {
+    width: min(340px, 80%);
+    margin-bottom: 32px;
   }
   .ap .occhiello {
     color: var(--avorio);

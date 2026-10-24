@@ -1,4 +1,5 @@
 ---
+import Logo from './Logo.astro';
 import { SITO, linkWhatsApp } from '../config';
 import { link } from '../temi';
 interface Props {
@@ -11,6 +12,7 @@ const { tema, titolo = 'Ti aspettiamo alla Roscignola' } = Astro.props;
 <section class="contatti-finale">
   <div class="contenitore contatti-griglia">
     <div>
+      <Logo variante="marchio" bianco class="cf-r" />
       <span class="occhiello">Prenota diretto</span>
       <h2>{titolo}</h2>
       <p>Prenotando dal sito paghi online in modo sicuro e hai il miglior prezzo, senza commissioni dei portali. Gli ospiti ci danno {SITO.recensioni.voto} su {SITO.recensioni.fonte} ({SITO.recensioni.numero} recensioni).</p>
@@ -28,6 +30,10 @@ const { tema, titolo = 'Ti aspettiamo alla Roscignola' } = Astro.props;
     background: var(--bordeaux);
     color: var(--avorio);
     padding-block: clamp(56px, 8vw, 100px);
+  }
+  .contatti-finale :global(.cf-r) {
+    width: 48px;
+    margin-bottom: 18px;
   }
   .contatti-finale .occhiello {
     color: var(--oro);

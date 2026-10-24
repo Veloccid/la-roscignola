@@ -31,8 +31,15 @@ const anno = new Date().getFullYear();
     <meta name="robots" content="noindex, nofollow" />
     <title>{titoloPagina}</title>
     <meta name="description" content={descrizione} />
-    <meta name="theme-color" content="#6b1c18" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="theme-color" content="#840202" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta property="og:image" content="https://la-roscignola.vercel.app/og-roscignola.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="La Roscignola: piscina tra le colline della Ciociaria" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta property="og:type" content="website" />
     <meta property="og:title" content={titoloPagina} />
     <meta property="og:description" content={descrizione} />
@@ -44,7 +51,8 @@ const anno = new Date().getFullYear();
     <header class:list={['testata', { 'testata--trasparente': trasparente }]}>
       <div class="contenitore testata-riga">
         <a class="testata-logo" href={link(tema.id)} aria-label="La Roscignola, torna alla home">
-          <Logo />
+          <Logo class="logo-scuro" />
+          <Logo bianco class="logo-chiaro" />
         </a>
         <nav class="menu-desk" aria-label="Menu principale">
           {voci.map((v) => <a href={v.href} aria-current={v.id === pagina ? 'page' : undefined}>{v.nome}</a>)}
@@ -67,7 +75,7 @@ const anno = new Date().getFullYear();
     <footer class="piede">
       <div class="contenitore piede-griglia">
         <div>
-          <Logo class="piede-logo" targa />
+          <Logo class="piede-logo" bianco />
           <p class="tenue-chiaro">{SITO.tipo} · {SITO.zona}</p>
         </div>
         <div>
@@ -156,12 +164,14 @@ const anno = new Date().getFullYear();
     border-color: var(--linea);
     color: var(--bordeaux);
   }
-  .testata :global(.logo) {
-    transition: background 0.3s ease, padding 0.3s ease;
+  .testata :global(.logo-chiaro) {
+    display: none;
   }
-  .testata--trasparente:not(.scorsa) :global(.logo) {
-    background: var(--avorio);
-    padding: 6px 10px;
+  .testata--trasparente:not(.scorsa) :global(.logo-chiaro) {
+    display: block;
+  }
+  .testata--trasparente:not(.scorsa) :global(.logo-scuro) {
+    display: none;
   }
   .testata--trasparente .menu-desk .btn {
     background: var(--avorio);
