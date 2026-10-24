@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import { SITO } from '../../config';
+import { REGOLE } from '../../data/camere';
 import { percorsiTemi, type Tema } from '../../temi';
 export function getStaticPaths() {
   return percorsiTemi();
@@ -12,7 +13,10 @@ const { tema } = Astro.props as { tema: Tema };
   <section class="sezione contenitore testo-legale">
     <span class="provvisorio">Da completare con un professionista</span>
     <h1>Condizioni di prenotazione</h1>
-    <p>Qui andranno le condizioni di prenotazione: pagamento anticipato online, politica di cancellazione e rimborso, orari di check‑in e check‑out, tassa di soggiorno, animali, regole della casa.</p>
+    <h2>Regole della casa</h2>
+    <ul>{REGOLE.map((r) => <li>{r}</li>)}</ul>
+    <h2>Pagamento e cancellazione</h2>
+    <p>Prenotando dal sito si paga online al momento della prenotazione. Politica di cancellazione e rimborso, eventuale tassa di soggiorno e deposito: da definire con il proprietario.</p>
     <p class="tenue">{SITO.nome} · {SITO.piva} · {SITO.cin}</p>
   </section>
 </Layout>

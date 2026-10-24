@@ -7,21 +7,20 @@ import { link } from '../../temi';
 const { tema } = Astro.props;
 // posizione dei punti cliccabili sul disegno (in percentuale)
 const punti: Record<string, { x: number; y: number }> = {
-  usignolo: { x: 38, y: 46 },
-  glicine: { x: 62, y: 46 },
-  uliveto: { x: 38, y: 77 },
-  pergola: { x: 84, y: 76 },
+  appartamento: { x: 38, y: 77 },
 };
 const extra = [
-  { id: 'giardino', nome: 'Il giardino', testo: SERVIZI_CASA[1].testo, x: 12, y: 61 },
-  { id: 'cucina', nome: 'La cucina', testo: SERVIZI_CASA[2].testo, x: 55, y: 90 },
-];
+  { id: 'giardino', nome: 'Il giardino', testo: SERVIZI_CASA[1].testo, x: 12, y: 61, foto: 'giardino' },
+  { id: 'cucina', nome: 'Il camino', testo: SERVIZI_CASA[2].testo, x: 60, y: 77, foto: 'cucinaCamino' },
+  { id: 'piscina', nome: 'La piscina', testo: SERVIZI_CASA[0].testo, x: 84, y: 76, foto: 'piscinaColline' },
+  { id: 'sopra', nome: 'Il piano di Franco', testo: 'Al piano di sopra abita Franco, l’host: discreto, ma sempre disponibile per consigli e imprevisti.', x: 62, y: 46, foto: 'vistaBorgo' },
+] as const;
 ---
 
 <section class="contenitore intro">
   <span class="occhiello">Entra pure</span>
-  <h1>Tocca una finestra <span class="corsivo">e affacciati</span></h1>
-  <p class="tenue">Ogni finestra è una camera. Toccala per vederla, sapere quanto costa e controllare i giorni liberi.</p>
+  <h1>Tocca la villa <span class="corsivo">e affacciati</span></h1>
+  <p class="tenue">Tocca i punti sul disegno: l’appartamento, il giardino, il camino, la piscina.</p>
 </section>
 
 <section class="contenitore">
@@ -113,7 +112,7 @@ const extra = [
   extra.map((e) => (
     <dialog class="finestra" id={`d-${e.id}`}>
       <button type="button" class="chiudi" aria-label="Chiudi">×</button>
-      <Foto foto={e.id === 'giardino' ? 'giardino' : 'cucinaCamino'} soggetto="" rapporto="16 / 9" />
+      <Foto foto={e.foto} soggetto="" rapporto="16 / 9" />
       <div class="finestra-testo">
         <h2>{e.nome}</h2>
         <p>{e.testo}</p>

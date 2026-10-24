@@ -1,0 +1,110 @@
+---
+// Scheda dell'unico alloggio: galleria foto + dati + pulsante prenota.
+import Foto from './Foto.astro';
+import { CAMERE } from '../data/camere';
+import { SITO } from '../config';
+import { link } from '../temi';
+interface Props {
+  tema: string;
+  class?: string;
+}
+const { tema, class: classe = '' } = Astro.props;
+const a = CAMERE[0];
+---
+
+<article class:list={['app', classe]}>
+  <div class="app-foto">
+    <Foto foto="cameraMatrimoniale" soggetto="" rapporto="4 / 3" class="f1" />
+    <Foto foto="cameraArmadio" soggetto="" rapporto="1 / 1" class="f2" />
+    <Foto foto="cucinaCamino" soggetto="" rapporto="1 / 1" class="f3" />
+    <Foto foto="bagno" soggetto="" rapporto="1 / 1" class="f4" />
+    <Foto foto="piscinaGazebo" soggetto="" rapporto="1 / 1" class="f5" />
+  </div>
+  <div class="app-testo">
+    <p class="app-meta">{a.piano} · {a.mq} m² · fino a {a.ospiti} ospiti</p>
+    <h3>{a.nome}</h3>
+    <p>{a.descrizione}</p>
+    <ul class="app-servizi">{a.servizi.map((s) => <li>{s}</li>)}</ul>
+    <div class="app-piede">
+      <p class="app-prezzo"><span>da</span> {a.prezzo}€ <span>/ notte</span></p>
+      <a class="btn" href={link(tema, 'disponibilita')}>Vedi le date libere</a>
+    </div>
+    <p class="app-voto"><b>{SITO.recensioni.voto}</b> su {SITO.recensioni.fonte} · {SITO.recensioni.numero} recensioni</p>
+  </div>
+</article>
+
+<style>
+  .app {
+    display: grid;
+    gap: clamp(20px, 4vw, 48px);
+    align-items: center;
+  }
+  @media (min-width: 900px) {
+    .app {
+      grid-template-columns: 1.2fr 1fr;
+    }
+  }
+  .app-foto {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+  }
+  .app-foto :global(.f1) {
+    grid-column: 1 / -1;
+  }
+  .app-meta {
+    font-size: 0.78rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--tenue);
+    margin-bottom: 6px;
+  }
+  .app h3 {
+    font-size: clamp(1.8rem, 3vw, 2.4rem);
+  }
+  .app-servizi {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .app-servizi li {
+    font-size: 0.78rem;
+    padding: 5px 11px;
+    border-radius: 999px;
+    border: 1px solid var(--linea);
+    background: var(--superficie);
+  }
+  .app-piede {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+  }
+  .app-prezzo {
+    margin: 0;
+    font-family: var(--serif);
+    font-size: 2rem;
+    color: var(--bordeaux);
+  }
+  .app-prezzo span {
+    font-family: var(--sans);
+    font-size: 0.82rem;
+    color: var(--tenue);
+  }
+  .app-voto {
+    margin-top: 14px;
+    font-size: 0.88rem;
+    color: var(--tenue);
+  }
+  .app-voto b {
+    background: var(--bordeaux);
+    color: var(--avorio);
+    padding: 3px 8px;
+    border-radius: 6px 6px 6px 0;
+    margin-right: 4px;
+    font-weight: 500;
+  }
+</style>

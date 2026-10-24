@@ -1,4 +1,5 @@
 ---
+import Appartamento from '../../components/Appartamento.astro';
 import Foto from '../../components/Foto.astro';
 import SchedaCamera from '../../components/SchedaCamera.astro';
 import Calendario from '../../components/Calendario.astro';
@@ -8,7 +9,7 @@ import { link } from '../../temi';
 const { tema } = Astro.props;
 const momenti = [
   { ora: '6:30', titolo: 'Il canto', testo: 'Prima della sveglia, dalla finestra: l’usignolo che dà il nome alla casa e il borgo sulla collina.', foto: 'vistaBorgo' },
-  { ora: '8:30', titolo: 'La colazione', testo: 'Caffè e qualcosa di buono in cucina, o fuori sotto il gazebo se c’è il sole.', foto: 'cucinaCamino' },
+  { ora: '8:30', titolo: 'La colazione', testo: 'Il caffè nella tua cucina, o fuori sotto il gazebo se c’è il sole.', foto: 'cucinaCamino' },
   { ora: '11:00', titolo: 'In piscina', testo: 'Un lettino, l’ombrellone e la vista sulle colline. Non serve andare da nessuna parte.', foto: 'piscinaColline' },
   { ora: '19:30', titolo: 'In giardino', testo: 'Il barbecue acceso, la tavola sotto il gazebo e il cielo che diventa arancione dietro gli ulivi.', foto: 'giardino' },
   { ora: '22:30', titolo: 'Buonanotte', testo: 'Silenzio vero, lenzuola fresche, buio di campagna. Domattina si ricomincia.', foto: 'cameraMatrimoniale' },
@@ -54,8 +55,8 @@ const momenti = [
 
 <section class="sezione contenitore">
   <span class="occhiello">Dove dormire</span>
-  <h2>Quattro camere per la tua giornata</h2>
-  <div class="griglia camere">{CAMERE.map((c) => <SchedaCamera camera={c} tema={tema} class="rivela" />)}</div>
+  <h2>La casa della tua giornata</h2>
+  <div class="rivela app-spazio"><Appartamento tema={tema} /></div>
 </section>
 
 <section class="sezione cal-sez">
@@ -255,8 +256,7 @@ const momenti = [
     margin: 0;
     color: var(--tenue);
   }
-  .camere {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  .app-spazio {
     margin-top: 24px;
   }
   .cal-sez {

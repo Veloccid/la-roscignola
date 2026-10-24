@@ -1,4 +1,5 @@
 ---
+import Appartamento from '../../components/Appartamento.astro';
 import Logo from '../../components/Logo.astro';
 import Foto from '../../components/Foto.astro';
 import Calendario from '../../components/Calendario.astro';
@@ -23,7 +24,7 @@ const parole = ['Ascolta.', 'All’alba,', 'in giardino,', 'canta l’usignolo.'
     </p>
     <div class="finale">
       <div class="scrittura"><Logo class="parola" targa /></div>
-      <p>Bed & Breakfast · piscina e giardino tra gli ulivi</p>
+      <p>Oasi naturale · piscina e giardino tra gli ulivi</p>
       <a class="btn" href={link(tema, 'disponibilita')}>Scegli le tue date</a>
     </div>
     <div class="scorri" aria-hidden="true">Scorri</div>
@@ -35,25 +36,11 @@ const parole = ['Ascolta.', 'All’alba,', 'in giardino,', 'canta l’usignolo.'
   <h2>Un nome che è un canto</h2>
   <p>
     Roscignola è l’usignolo nel dialetto di qui. Lo trovi nel logo, sulla piuma della R, e lo senti davvero al mattino dalle finestre.
-    Camere tranquille, una piscina tra gli ulivi e il tempo che rallenta. <span class="provvisorio">Testo provvisorio</span>
+    Un appartamento tutto per voi, una piscina tra gli ulivi e il tempo che rallenta. <span class="provvisorio">Testo provvisorio</span>
   </p>
 </section>
 
-<section class="contenitore camere">
-  {
-    CAMERE.map((c, i) => (
-      <article class="cam rivela" style={`--d:${i * 80}ms`}>
-        <svg class="piuma" viewBox="0 0 200 40" aria-hidden="true">
-          <path d="M2 30 C 60 30, 120 4, 198 8" />
-        </svg>
-        <Foto soggetto={c.nome} tipo="camera" tinta={c.tinta} src={c.foto} rapporto="3 / 4" />
-        <h3>{c.nome}</h3>
-        <p class="tenue">{c.breve}</p>
-        <a href={`${link(tema, 'disponibilita')}?camera=${c.id}`}>da {c.prezzo}€ · date libere →</a>
-      </article>
-    ))
-  }
-</section>
+<section class="contenitore rivela"><Appartamento tema={tema} /></section>
 
 <section class="sezione contenitore">
   <h2>Quando vieni ad ascoltarlo?</h2>

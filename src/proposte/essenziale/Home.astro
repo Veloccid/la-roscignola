@@ -1,4 +1,5 @@
 ---
+import Appartamento from '../../components/Appartamento.astro';
 import Foto from '../../components/Foto.astro';
 import SchedaCamera from '../../components/SchedaCamera.astro';
 import Calendario from '../../components/Calendario.astro';
@@ -10,12 +11,12 @@ const { tema } = Astro.props;
 
 <section class="contenitore apertura">
   <div class="apertura-testo">
-    <span class="occhiello">Bed & Breakfast</span>
+    <span class="occhiello">Oasi naturale · Ciociaria</span>
     <h1>Dormire dove canta <span class="corsivo">l’usignolo</span></h1>
-    <p class="tenue">Una piscina tra gli ulivi, un giardino silenzioso e camere tranquille con vista sulle colline. Scegli le date libere e prenota in due minuti. <span class="provvisorio">Testo provvisorio</span></p>
+    <p class="tenue">Un appartamento in villa con piscina tutta per voi, tra ulivi e vigneti sulle colline della Ciociaria. Scegli le date libere e prenota in due minuti. <span class="provvisorio">Testo provvisorio</span></p>
     <div class="azioni">
       <a class="btn" href={link(tema, 'disponibilita')}>Vedi le date libere</a>
-      <a class="btn btn--vuoto" href={link(tema, 'camere')}>Le camere</a>
+      <a class="btn btn--vuoto" href={link(tema, 'appartamento')}>L’appartamento</a>
     </div>
   </div>
   <Foto foto="piscinaColline" soggetto="" rapporto="5 / 4" class="apertura-foto" />
@@ -23,10 +24,10 @@ const { tema } = Astro.props;
 
 <section class="sezione contenitore">
   <div class="titolo-riga">
-    <h2>Le camere</h2>
-    <a href={link(tema, 'camere')}>Tutte le camere →</a>
+    <h2>La casa</h2>
+    <a href={link(tema, 'appartamento')}>Tutte le foto →</a>
   </div>
-  <div class="griglia camere">{CAMERE.map((c) => <SchedaCamera camera={c} tema={tema} class="rivela" />)}</div>
+  <div class="rivela app-spazio"><Appartamento tema={tema} /></div>
 </section>
 
 <section class="sezione cal-sezione">
@@ -84,8 +85,7 @@ const { tema } = Astro.props;
   .titolo-riga a {
     color: var(--bordeaux);
   }
-  .camere {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  .app-spazio {
     margin-top: 24px;
   }
   .cal-sezione {

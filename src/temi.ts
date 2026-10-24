@@ -11,10 +11,10 @@ export const TEMI: Tema[] = [
   { id: 'bordeaux', lettera: 'B', nome: 'Bordeaux pieno', idea: 'Grandi blocchi a colore pieno: il bordeaux del logo diventa la casa.' },
   { id: 'diario', lettera: 'C', nome: 'Diario', idea: 'Impaginata come una rivista: la casa raccontata a capitoli.' },
   { id: 'canto', lettera: 'D', nome: 'Il canto', idea: 'La R con la piuma apre la pagina e il logo si scrive mentre scorri.', wow: true },
-  { id: 'cancello', lettera: 'E', nome: 'Dal cancello alla stanza', idea: 'Scorrendo entri: cancello, giardino, camera, colazione.', wow: true },
-  { id: 'casa', lettera: 'F', nome: 'La casa da esplorare', idea: 'La casa disegnata: tocchi una finestra e si apre la camera.' },
+  { id: 'cancello', lettera: 'E', nome: 'Dal cancello alla casa', idea: 'Scorrendo entri: cancello, giardino, casa e il caffè del mattino.', wow: true },
+  { id: 'casa', lettera: 'F', nome: 'La casa da esplorare', idea: 'La villa disegnata: tocchi un punto e scopri casa, piscina, giardino e camino.' },
   { id: 'date', lettera: 'G', nome: 'Prima le date', idea: 'Il calendario è la prima cosa: scegli i giorni e vedi subito cosa è libero.' },
-  { id: 'chiavi', lettera: 'H', nome: 'Le chiavi', idea: 'Ogni camera è una chiave con la sua targhetta: la giri e scopri la stanza.' },
+  { id: 'chiavi', lettera: 'H', nome: 'Le chiavi', idea: 'Quattro chiavi per quattro luoghi della casa: giri la targhetta e scopri cosa apre.' },
   { id: 'giornata', lettera: 'I', nome: 'Una giornata qui', idea: 'Il cielo passa dall’alba alla notte mentre scorri la giornata tipo.', wow: true },
   { id: 'foto', lettera: 'J', nome: 'Tutto foto', idea: 'Le foto vere a schermo intero, testi minimi: piscina, giardino e camere parlano da sole.' },
 ];

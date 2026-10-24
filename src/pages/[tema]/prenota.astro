@@ -90,7 +90,6 @@ const { tema } = Astro.props as { tema: Tema };
         <div><dt>Partenza</dt><dd>${dataLunga(al)}</dd></div>
       </dl>
       <p class="r-riga"><span>${n} ${n === 1 ? 'notte' : 'notti'} × ${euro(prezzo(cam!.id))}</span><span>${euro(tot)}</span></p>
-      <p class="r-riga"><span>Colazione</span><span>inclusa</span></p>
       <p class="r-riga r-tot"><span>Totale</span><b>${euro(tot)}</b></p>
       <p class="tenue r-tassa">Tassa di soggiorno da pagare in struttura, se prevista.</p>
       ${ok ? '' : '<p class="errore">Queste date sono appena state prenotate. Torna al calendario per sceglierne altre.</p>'}`;

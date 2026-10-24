@@ -1,0 +1,83 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Appartamento from '../../components/Appartamento.astro';
+import BloccoContatti from '../../components/BloccoContatti.astro';
+import Foto from '../../components/Foto.astro';
+import { SERVIZI_CASA, REGOLE } from '../../data/camere';
+import { percorsiTemi, type Tema } from '../../temi';
+export function getStaticPaths() {
+  return percorsiTemi();
+}
+const { tema } = Astro.props as { tema: Tema };
+---
+
+<Layout tema={tema} titolo="L’appartamento" pagina="appartamento">
+  <section class="sezione contenitore intestazione">
+    <span class="occhiello">L’appartamento</span>
+    <h1>Una casa intera, <span class="corsivo">tutta per voi</span></h1>
+    <p class="tenue">58 m² nella villa, con piscina a uso esclusivo e giardino tra ulivi e vigneti. Fino a 4 ospiti.</p>
+  </section>
+
+  <section class="contenitore"><Appartamento tema={tema.id} /></section>
+
+  <section class="sezione contenitore">
+    <h2>Fuori e dentro casa</h2>
+    <div class="galleria">
+      <Foto foto="piscinaColline" soggetto="" rapporto="4 / 3" />
+      <Foto foto="piscinaGiardino" soggetto="" rapporto="4 / 3" />
+      <Foto foto="giardino" soggetto="" rapporto="4 / 3" />
+      <Foto foto="vistaBorgo" soggetto="" rapporto="4 / 3" />
+      <Foto foto="cucina" soggetto="" rapporto="4 / 3" />
+      <Foto foto="piscinaGazebo" soggetto="" rapporto="4 / 3" />
+    </div>
+    <div class="griglia servizi-casa">
+      {SERVIZI_CASA.map((s) => (
+        <div><h3>{s.titolo}</h3><p class="tenue">{s.testo}</p></div>
+      ))}
+    </div>
+  </section>
+
+  <section class="sezione regole-sez">
+    <div class="contenitore">
+      <h2>Da sapere</h2>
+      <ul class="regole">{REGOLE.map((r) => <li>{r}</li>)}</ul>
+    </div>
+  </section>
+
+  <BloccoContatti tema={tema.id} />
+</Layout>
+
+<style>
+  .intestazione {
+    padding-bottom: 24px;
+    max-width: 900px;
+  }
+  .galleria {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    margin: 24px 0 48px;
+  }
+  .servizi-casa {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+  .servizi-casa h3 {
+    font-size: 1.25rem;
+    color: var(--bordeaux);
+  }
+  .regole-sez {
+    background: var(--sabbia);
+  }
+  .regole {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0 32px;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  }
+  .regole li {
+    padding: 12px 0;
+    border-bottom: 1px solid var(--linea);
+  }
+</style>

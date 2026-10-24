@@ -1,4 +1,5 @@
 ---
+import Appartamento from '../../components/Appartamento.astro';
 import SchedaCamera from '../../components/SchedaCamera.astro';
 import Calendario from '../../components/Calendario.astro';
 import BloccoContatti from '../../components/BloccoContatti.astro';
@@ -8,8 +9,8 @@ const { tema } = Astro.props;
 const tappe = [
   { n: '01', titolo: 'Il cancello', testo: 'Una stradina, il cancello in ferro e il nome sulla targa. Parcheggi dentro, senza pensieri.', fondo: '#E4D4BD' },
   { n: '02', titolo: 'Il giardino', testo: 'Ulivi, prato e sdraio all’ombra. È qui che al mattino canta l’usignolo.', fondo: '#DFE3D4' },
-  { n: '03', titolo: 'La tua camera', testo: 'Lenzuola fresche, bagno privato, finestre sul verde. Quattro stanze, ognuna diversa.', fondo: '#F1E4DD' },
-  { n: '04', titolo: 'La colazione', testo: 'Torte del giorno, marmellate di casa, caffè come piace a te. Sotto il pergolato, se c’è il sole.', fondo: '#F3E7D0' },
+  { n: '03', titolo: 'La casa', testo: 'Camera, soggiorno con camino e cucina: 58 m² tutti per voi, con le finestre sul verde.', fondo: '#F1E4DD' },
+  { n: '04', titolo: 'Il caffè del mattino', testo: 'Sotto il gazebo, con la piscina davanti e il silenzio delle colline. Nessuna fretta.', fondo: '#F3E7D0' },
 ];
 ---
 
@@ -73,8 +74,8 @@ const tappe = [
 
 <section class="sezione contenitore">
   <span class="occhiello">Benvenuto dentro</span>
-  <h2>Scegli la tua stanza</h2>
-  <div class="griglia camere">{CAMERE.map((c) => <SchedaCamera camera={c} tema={tema} class="rivela" />)}</div>
+  <h2>Il tuo appartamento</h2>
+  <div class="rivela app-spazio"><Appartamento tema={tema} /></div>
 </section>
 
 <section class="sezione cal-sez">
@@ -261,8 +262,7 @@ const tappe = [
     cursor: pointer;
     padding: 4px 0;
   }
-  .camere {
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  .app-spazio {
     margin-top: 24px;
   }
   .cal-sez {

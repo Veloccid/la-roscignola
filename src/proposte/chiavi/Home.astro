@@ -5,6 +5,14 @@ import BloccoContatti from '../../components/BloccoContatti.astro';
 import { CAMERE } from '../../data/camere';
 import { link } from '../../temi';
 const { tema } = Astro.props;
+const a = CAMERE[0];
+// quattro chiavi per i quattro luoghi della casa (c'è un solo alloggio)
+const LUOGHI = [
+  { nome: 'La casa', breve: 'Casa', righe: [a.letti, `${a.mq} m² · fino a ${a.ospiti} ospiti`], prezzo: `da ${a.prezzo}€`, foto: 'cameraMatrimoniale', testo: a.descrizione },
+  { nome: 'La piscina', breve: 'Piscina', righe: ['A uso esclusivo', 'Zona acqua bassa'], prezzo: 'solo vostra', foto: 'piscinaColline', testo: 'La piscina all’aperto è riservata a chi soggiorna: lettini, ombrelloni e la vista sulle colline.' },
+  { nome: 'Il giardino', breve: 'Giardino', righe: ['Gazebo e barbecue', 'Tra ulivi e vigneti'], prezzo: 'animali ok', foto: 'giardino', testo: 'Un ampio giardino con gazebo, tavolo all’aperto e barbecue. Gli animali sono benvenuti.' },
+  { nome: 'La cucina', breve: 'Cucina', righe: ['Cucina attrezzata', 'Caminetto a legna'], prezzo: 'tutta vostra', foto: 'cucinaCamino', testo: 'Cucina privata con tutto il necessario e, nel soggiorno, il caminetto a legna per le sere d’inverno.' },
+] as const;
 ---
 
 <section class="bacheca-sez">
@@ -12,12 +20,12 @@ const { tema } = Astro.props;
     <div class="testa">
       <span class="occhiello">Reception</span>
       <h1>Scegli la tua chiave</h1>
-      <p class="tenue">Ogni chiave apre una stanza. Toccala per girare la targhetta.</p>
+      <p class="tenue">Ogni chiave apre un luogo della casa. Toccala per girare la targhetta.</p>
     </div>
     <div class="bacheca">
       <div class="asse" aria-hidden="true"></div>
       {
-        CAMERE.map((c, i) => (
+        LUOGHI.map((c, i) => (
           <div class="chiave" style={`--i:${i}`}>
             <span class="gancio" aria-hidden="true"></span>
             <div class="oscilla">
@@ -29,18 +37,17 @@ const { tema } = Astro.props;
               <button type="button" class="targa" aria-expanded="false" aria-label={`Gira la targhetta: ${c.nome}`}>
                 <span class="faccia fronte">
                   <span class="num">{i + 1}</span>
-                  <span class="nome">{c.nome.replace('Camera ', '').replace('Suite ', '')}</span>
+                  <span class="nome">{c.breve}</span>
                   <span class="gira">gira ↻</span>
                 </span>
                 <span class="faccia retro">
                   <b>{c.nome}</b>
-                  <span>{c.letti}</span>
-                  <span>fino a {c.ospiti} ospiti · {c.mq} m²</span>
-                  <span class="prezzo">da {c.prezzo}€</span>
+                  {c.righe.map((r) => <span>{r}</span>)}
+                  <span class="prezzo">{c.prezzo}</span>
                 </span>
               </button>
             </div>
-            <a class="prenota" href={`${link(tema, 'disponibilita')}?camera=${c.id}`}>Date libere →</a>
+            <a class="prenota" href={link(tema, 'disponibilita')}>Date libere →</a>
           </div>
         ))
       }
@@ -50,13 +57,13 @@ const { tema } = Astro.props;
 
 <section class="sezione contenitore stanze">
   {
-    CAMERE.map((c, i) => (
+    LUOGHI.map((c, i) => (
       <article class="stanza rivela">
-        <Foto soggetto={c.nome} tipo="camera" tinta={c.tinta} src={c.foto} rapporto="4 / 3" />
+        <Foto foto={c.foto} soggetto="" rapporto="4 / 3" />
         <div>
           <span class="tag">Chiave n. {i + 1}</span>
           <h3>{c.nome}</h3>
-          <p class="tenue">{c.descrizione}</p>
+          <p class="tenue">{c.testo}</p>
         </div>
       </article>
     ))
@@ -65,7 +72,7 @@ const { tema } = Astro.props;
 
 <section class="sezione cal-sez">
   <div class="contenitore">
-    <h2>Le chiavi libere, giorno per giorno</h2>
+    <h2>Quando ritiri le chiavi?</h2>
     <Calendario tema={tema} />
   </div>
 </section>

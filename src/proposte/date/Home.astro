@@ -1,4 +1,5 @@
 ---
+import Appartamento from '../../components/Appartamento.astro';
 import Foto from '../../components/Foto.astro';
 import Calendario from '../../components/Calendario.astro';
 import BloccoContatti from '../../components/BloccoContatti.astro';
@@ -12,7 +13,7 @@ const { tema } = Astro.props;
   <div class="contenitore">
     <div class="apertura-testa">
       <div>
-        <span class="occhiello">La Roscignola · Bed & Breakfast</span>
+        <span class="occhiello">La Roscignola · Oasi naturale</span>
         <h1>Quando arrivi?</h1>
       </div>
       <ul class="garanzie">
@@ -26,21 +27,8 @@ const { tema } = Astro.props;
 </section>
 
 <section class="sezione contenitore">
-  <h2>Le quattro camere</h2>
-  <div class="striscia">
-    {
-      CAMERE.map((c) => (
-        <a class="mini rivela" href={`${link(tema, 'disponibilita')}?camera=${c.id}`}>
-          <Foto soggetto={c.nome} tipo="camera" tinta={c.tinta} src={c.foto} rapporto="1 / 1" etichetta={false} />
-          <div>
-            <b>{c.nome}</b>
-            <span>{c.ospiti} ospiti · da {c.prezzo}€</span>
-          </div>
-        </a>
-      ))
-    }
-  </div>
-  <p class="tutte"><a href={link(tema, 'camere')}>Foto e dettagli delle camere →</a></p>
+  <h2>La casa</h2>
+  <div class="rivela app-spazio"><Appartamento tema={tema} /></div>
 </section>
 
 <section class="sezione info">
@@ -123,6 +111,9 @@ const { tema } = Astro.props;
   .mini span {
     font-size: 0.84rem;
     color: var(--tenue);
+  }
+  .app-spazio {
+    margin-top: 20px;
   }
   .tutte a {
     color: var(--bordeaux);

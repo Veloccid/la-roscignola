@@ -15,7 +15,7 @@ const { tema, titolo, descrizione = SITO.descrizione, pagina = '', trasparente =
 const titoloPagina = titolo ? `${titolo} · ${SITO.nome}` : SITO.titolo;
 const voci = [
   { href: link(tema.id), nome: 'Home', id: '' },
-  { href: link(tema.id, 'camere'), nome: 'Camere', id: 'camere' },
+  { href: link(tema.id, 'appartamento'), nome: 'L’appartamento', id: 'appartamento' },
   { href: link(tema.id, 'disponibilita'), nome: 'Disponibilità', id: 'disponibilita' },
   { href: link(tema.id, 'contatti'), nome: 'Contatti', id: 'contatti' },
 ];
@@ -72,7 +72,7 @@ const anno = new Date().getFullYear();
         <div>
           <h4>Contatti</h4>
           <p>
-            <a href={linkWhatsApp('Ciao! Vorrei informazioni sul B&B La Roscignola.')}>WhatsApp</a><br />
+            <a href={linkWhatsApp('Ciao! Vorrei informazioni sulla Roscignola.')}>WhatsApp</a><br />
             <a href={`mailto:${SITO.email}`}>{SITO.email}</a><br />
             {SITO.indirizzo}
           </p>

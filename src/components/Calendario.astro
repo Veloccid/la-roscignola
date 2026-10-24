@@ -8,20 +8,25 @@ interface Props {
   mesi?: 1 | 2;
   class?: string;
 }
-const { tema, camera = '', mesi = 2, class: classe = '' } = Astro.props;
+const unica = CAMERE.length === 1;
+const { tema, camera = unica ? CAMERE[0].id : '', mesi = 2, class: classe = '' } = Astro.props;
 ---
 
 <rs-calendario class:list={['cal', classe]} data-tema={tema} data-camera={camera} data-mesi={mesi}>
+  {
+    !unica && (
   <div class="cal-camere" role="group" aria-label="Scegli la camera">
-    <button type="button" data-cam="" aria-pressed={camera === '' ? 'true' : 'false'}>Tutte le camere</button>
-    {
-      CAMERE.map((c) => (
-        <button type="button" data-cam={c.id} aria-pressed={camera === c.id ? 'true' : 'false'}>
-          {c.nome.replace('Camera ', '')}
-        </button>
-      ))
-    }
-  </div>
+        <button type="button" data-cam="" aria-pressed={camera === '' ? 'true' : 'false'}>Tutte le camere</button>
+        {
+          CAMERE.map((c) => (
+            <button type="button" data-cam={c.id} aria-pressed={camera === c.id ? 'true' : 'false'}>
+              {c.nome.replace('Camera ', '')}
+            </button>
+          ))
+        }
+      </div>
+    )
+  }
   <div class="cal-corpo">
     <div class="cal-mesi-wrap">
       <div class="cal-nav">
@@ -72,7 +77,7 @@ const { tema, camera = '', mesi = 2, class: classe = '' } = Astro.props;
 
     connectedCallback() {
       this.tema = this.dataset.tema || '';
-      this.camera = this.dataset.camera || new URLSearchParams(location.search).get('camera') || '';
+      this.camera = this.dataset.camera || new URLSearchParams(location.search).get('camera') || (CAMERE.length === 1 ? CAMERE[0].id : '');
       this.mesi = Number(this.dataset.mesi || 2);
       carica();
       this.querySelectorAll<HTMLButtonElement>('.cal-camere button').forEach((b) =>

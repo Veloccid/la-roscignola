@@ -29,7 +29,7 @@ export interface Stato {
   sync: Record<string, { airbnb: string; booking: string; ultima?: string }>;
 }
 
-const CHIAVE = 'roscignola-demo-v1';
+const CHIAVE = 'roscignola-demo-v2';
 
 export const FONTI: Record<Fonte, { nome: string; colore: string }> = {
   sito: { nome: 'Sito', colore: '#6b1c18' },
@@ -92,19 +92,14 @@ function seme(): Stato {
   return {
     versione: 1,
     prenotazioni: [
-      p('usignolo', -1, 3, 'Giulia e Marco R.', 'airbnb'),
-      p('usignolo', 4, 2, 'Elena F.', 'sito', { email: 'elena@example.com' }),
-      p('usignolo', 9, 5, 'Thomas B.', 'booking'),
-      p('usignolo', 20, 3, 'Sara L.', 'sito'),
-      p('glicine', 0, 2, 'Famiglia Conti', 'booking', { ospiti: 3 }),
-      p('glicine', 5, 4, 'Anna e Luca', 'airbnb'),
-      p('glicine', 14, 2, 'Manutenzione', 'blocco', { note: 'Imbiancatura' }),
-      p('uliveto', 2, 3, 'Paolo M.', 'manuale', { note: 'Prenotato al telefono' }),
-      p('uliveto', 7, 2, 'Claire D.', 'booking'),
-      p('uliveto', 11, 6, 'Roberto e Ida', 'sito'),
-      p('pergola', 1, 4, 'Famiglia Bianchi', 'sito', { ospiti: 4 }),
-      p('pergola', 8, 7, 'Famiglia Weber', 'booking', { ospiti: 4 }),
-      p('pergola', 24, 3, 'Martina G.', 'airbnb'),
+      p('appartamento', -1, 3, 'Giulia e Marco R.', 'booking'),
+      p('appartamento', 3, 2, 'Elena F.', 'sito', { email: 'elena@example.com' }),
+      p('appartamento', 7, 4, 'Thomas B.', 'airbnb', { ospiti: 2 }),
+      p('appartamento', 13, 2, 'Paolo M.', 'manuale', { note: 'Prenotato al telefono' }),
+      p('appartamento', 17, 3, 'Chiuso', 'blocco', { note: 'Manutenzione piscina' }),
+      p('appartamento', 22, 5, 'Famiglia Weber', 'booking', { ospiti: 4 }),
+      p('appartamento', 30, 2, 'Sara L.', 'sito'),
+      p('appartamento', 36, 3, 'Anna e Luca', 'airbnb'),
     ],
     prezzi: Object.fromEntries(CAMERE.map((c) => [c.id, c.prezzo])),
     sync: Object.fromEntries(
